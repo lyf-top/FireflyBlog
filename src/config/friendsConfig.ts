@@ -41,25 +41,14 @@ export const friendsConfig: FriendLink[] = [
 		weight: 12, // 权重，数字越大排序越靠前
 		enabled: true, // 是否启用
 	},
-
-	{
-		title: "一飞",
-		imgurl:
-			"https://weavatar.com/avatar/d252655d40d6874417a720bad0a6c5f77f8f6a1fd2f882f8f338402dc37e4190?s=640",
-		desc: "一飞的博客",
-		siteurl: "https://f3f3.top",
-		tags: ["Blog"],
-		weight: 99, // 权重，数字越大排序越靠前
-		enabled: true, // 是否启用
-	},
 	{
 		title: "阿夜",
 		imgurl: "https://docs-firefly.cuteleaf.cn/logo.png",
 		desc: "这是基于springbootvue3的博客系统",
 		siteurl: "https://blog.ayeez.cn/",
 		tags: ["Blog"],
-		weight: 9,
-		enabled: true,
+		weight: 9,// 权重，数字越大排序越靠前
+		enabled: true,// 是否启用
 	},
 	{
 		title: "Fqlr",
@@ -80,68 +69,211 @@ export const friendsConfig: FriendLink[] = [
 		enabled: true,
 	},
 	{
-		title: "喵斯基部落",
+		title: "Key的blog",
 		imgurl: "https://avatars.githubusercontent.com/u/44914786?v=4&s=640",
-		desc: "运维博客",
-		siteurl: "https://blog.moewah.com",
+		desc: "个人java学习",
+		siteurl: "https://cyborg2077.github.io",
 		tags: ["Blog"],
 		weight: 8,
 		enabled: true,
 	},
 	{
-		title: "喵斯基部落",
+		title: "二叉树树博客",
 		imgurl: "https://avatars.githubusercontent.com/u/44914786?v=4&s=640",
 		desc: "运维博客",
-		siteurl: "https://blog.moewah.com",
+		siteurl: "https://2x.nz/q",
 		tags: ["Blog"],
 		weight: 8,
 		enabled: true,
 	},
 	{
-		title: "喵斯基部落",
+		title: "U-Blog",
 		imgurl: "https://avatars.githubusercontent.com/u/44914786?v=4&s=640",
-		desc: "运维博客",
-		siteurl: "https://blog.moewah.com",
+		desc: "全栈博客",
+		siteurl: "https://uluo.cloud/about",
 		tags: ["Blog"],
 		weight: 8,
 		enabled: true,
 	},
 	{
-		title: "喵斯基部落",
+		title: "Firefly官方博客",
 		imgurl: "https://avatars.githubusercontent.com/u/44914786?v=4&s=640",
-		desc: "运维博客",
-		siteurl: "https://blog.moewah.com",
+		desc: "官方博客",
+		siteurl: "https://blog.cuteleaf.cn",
 		tags: ["Blog"],
 		weight: 8,
 		enabled: true,
 	},
 	{
-		title: "喵斯基部落",
+		title: "upxuu的博客",
 		imgurl: "https://avatars.githubusercontent.com/u/44914786?v=4&s=640",
-		desc: "运维博客",
-		siteurl: "https://blog.moewah.com",
+		desc: "初中生的博客",
+		siteurl: "https://upxuu.com/about",
 		tags: ["Blog"],
 		weight: 8,
 		enabled: true,
 	},
 	{
-		title: "喵斯基部落",
+		title: "Zensical的博客",
 		imgurl: "https://avatars.githubusercontent.com/u/44914786?v=4&s=640",
-		desc: "运维博客",
-		siteurl: "https://blog.moewah.com",
+		desc: "Zensical主题博客",
+		siteurl: "https://wcowin.work",
 		tags: ["Blog"],
 		weight: 8,
 		enabled: true,
 	},
 	{
-		title: "喵斯基部落",
+		title: "葱葱的小窝",
 		imgurl: "https://avatars.githubusercontent.com/u/44914786?v=4&s=640",
-		desc: "运维博客",
-		siteurl: "https://blog.moewah.com",
+		desc: "后端八股分享",
+		siteurl: "https://blog.mosicong.top",
 		tags: ["Blog"],
 		weight: 8,
 		enabled: true,
 	},
+		{
+		title: "AirTouch的博客",
+		imgurl: "https://avatars.githubusercontent.com/u/44914786?v=4&s=640",
+		desc: "项目推荐",
+		siteurl: "https://www.xsl.im",
+		tags: ["Blog"],
+		weight: 8,
+		enabled: true,
+	},
+		{
+		title: "tsoo的博客",
+		imgurl: "https://avatars.githubusercontent.com/u/44914786?v=4&s=640",
+		desc: "建站备案指南",
+		siteurl: "https://blog.tsoo.net",
+		tags: ["Blog"],
+		weight: 8,
+		enabled: true,
+	},
+			{
+		title: "周润发的博客",
+		imgurl: "https://avatars.githubusercontent.com/u/44914786?v=4&s=640",
+		desc: "开源项目指南",
+		siteurl: "https://blog.zrf.me",
+		tags: ["Blog"],
+		weight: 8,
+		enabled: true,
+	},
+			{
+		title: "保研算法学习博客",
+		imgurl: "https://avatars.githubusercontent.com/u/44914786?v=4&s=640",
+		desc: "江财保研算法指南",
+		siteurl: "https://juniexd.cn",
+		tags: ["Blog"],
+		weight: 8,
+		enabled: true,
+	},
+			{
+		title: "woodfish的博客",
+		imgurl: "https://avatars.githubusercontent.com/u/44914786?v=4&s=640",
+		desc: "江财技术学习笔记",
+		siteurl: "https://woodfish.site",
+		tags: ["Blog"],
+		weight: 8,
+		enabled: true,
+	},
+		{
+		title: "npiter的博客",
+		imgurl: "https://avatars.githubusercontent.com/u/44914786?v=4&s=640",
+		desc: "江财竞赛分享",
+		siteurl: "https://npiter.de/",
+		tags: ["Blog"],
+		weight: 8,
+		enabled: true,
+	},
+	{
+		title: "mohao的博客",
+		imgurl: "https://avatars.githubusercontent.com/u/44914786?v=4&s=640",
+		desc: "江财题解",
+		siteurl: "https://blog.mohao.me/",
+		tags: ["Blog"],
+		weight: 8,
+		enabled: true,
+	},
+	{
+		title: "hxq的博客",
+		imgurl: "https://avatars.githubusercontent.com/u/44914786?v=4&s=640",
+		desc: "专转本英语笔记",
+		siteurl: "https://hxqblog.cn",
+		tags: ["Blog"],
+		weight: 8,
+		enabled: true,
+	},
+{
+		title: "nw177十三的博客",
+		imgurl: "https://avatars.githubusercontent.com/u/44914786?v=4&s=640",
+		desc: "博客搭建指南",
+		siteurl: "https://blog.nw177.cn/",
+		tags: ["Blog"],
+		weight: 8,
+		enabled: true,
+	},
+	{
+		title: "yeqing的博客",
+		imgurl: "https://avatars.githubusercontent.com/u/44914786?v=4&s=640",
+		desc: "镜像与加速",
+		siteurl: "https://blog.yeqing.net/",
+		tags: ["Blog"],
+		weight: 8,
+		enabled: true,
+	},
+	{
+		title: "yc520的博客",
+		imgurl: "https://avatars.githubusercontent.com/u/44914786?v=4&s=640",
+		desc: "共享资源分享",
+		siteurl: "https://www.yc520.top",
+		tags: ["Blog"],
+		weight: 8,
+		enabled: true,
+	},
+	{
+		title: "没用的小飞鼠的博客",
+		imgurl: "https://avatars.githubusercontent.com/u/44914786?v=4&s=640",
+		desc: "专转本英语笔记",
+		siteurl: "https://feishu.xiao-feishu.top/",
+		tags: ["Blog"],
+		weight: 8,
+		enabled: true,
+	},
+	{
+		title: "vmss的博客",
+		imgurl: "https://avatars.githubusercontent.com/u/44914786?v=4&s=640",
+		desc: "论坛加博客",
+		siteurl: "https://vmss.cn/",
+		tags: ["Blog"],
+		weight: 8,
+		enabled: true,
+	},
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+	
 ];
 
 // 获取启用的友链并进行排序
