@@ -6,7 +6,7 @@
     "dev": "pnpm gen:abbr && astro dev",
     "start": "pnpm dev",
     "check": "astro check",
-    "build": "pnpm gen:abbr && node scripts/generate-icons.js && npx tsx scripts/generate-lqips.ts && astro build && node -e \"const fs=require('fs');if(fs.existsSync('public/_routes.json')){fs.copyFileSync('public/_routes.json','dist/_routes.json');fs.copyFileSync('public/_routes.json','dist/client/_routes.json');}\"",
+    "build": "pnpm gen:abbr && node scripts/generate-icons.js && npx tsx scripts/generate-lqips.ts && astro build && node scripts/fix-cloudflare-pages.js",
     "lqips": "npx tsx scripts/generate-lqips.ts",
     "preview": "astro preview",
     "astro": "astro",
