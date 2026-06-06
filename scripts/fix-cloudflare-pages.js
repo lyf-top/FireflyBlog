@@ -1,56 +1,52 @@
 /**
  * Fix Cloudflare Pages output structure.
  *
- * Cloudflare Pages expects _worker.js and _routes.json at the output root.
- * Astro's Cloudflare adapter puts static files in dist/client/ and worker in dist/server/.
- * This script merges everything into dist/ for Cloudflare Pages compatibility.
+ * @astrojs/cloudflare outputs:
+ *   dist/client/  → static assets
+ *   dist/server/  → worker code (entry.mjs + chunks)
+ *
+ * Cloudflare Pages needs everything in ONE output directory:
+ *   _worker.js   → SSR entry
+ *   _routes.json → routing rules
+ *   (static files)
+ *
+ * Strategy: merge everything into dist/client/ as the output directory.
  */
-import { existsSync, cpSync, readdirSync } from "node:fs";
+import { existsSync, cpSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 const root = resolve("dist");
 const clientDir = join(root, "client");
 const serverDir = join(root, "server");
 
-// 1. Move static assets from dist/client/ to dist/
-if (existsSync(clientDir)) {
-    const files = readdirSync(clientDir);
-    for (const file of files) {
-        if (file === ".assetsignore") continue;
-        const src = join(clientDir, file);
-        const dst = join(root, file);
-        cpSync(src, dst, { recursive: true });
-    }
-    console.log("✅ Moved static assets from dist/client/ to dist/");
-}
-
-// 2. Copy _routes.json to dist/
+// 1. Copy _routes.json into dist/client/
 const routesSrc = join("public", "_routes.json");
 if (existsSync(routesSrc)) {
-    cpSync(routesSrc, join(root, "_routes.json"));
-    console.log("✅ Copied _routes.json to dist/");
+    cpSync(routesSrc, join(clientDir, "_routes.json"));
+    console.log("✅ _routes.json → dist/client/");
 }
 
-// 3. Copy entry.mjs as _worker.js to dist/
+// 2. Copy entry.mjs as _worker.js into dist/client/
 const entrySrc = join(serverDir, "entry.mjs");
 if (existsSync(entrySrc)) {
-    cpSync(entrySrc, join(root, "_worker.js"));
-    console.log("✅ Copied entry.mjs → _worker.js");
+    cpSync(entrySrc, join(clientDir, "_worker.js"));
+    console.log("✅ entry.mjs → dist/client/_worker.js");
 }
 
-// 4. Copy server chunks (needed by entry.mjs imports)
+// 3. Copy server chunks into dist/client/chunks/
 const srcChunks = join(serverDir, "chunks");
-const dstChunks = join(root, "chunks");
+const dstChunks = join(clientDir, "chunks");
 if (existsSync(srcChunks)) {
     cpSync(srcChunks, dstChunks, { recursive: true });
-    console.log("✅ Copied server chunks");
+    console.log("✅ server chunks → dist/client/chunks/");
 }
 
-// 5. Copy server _astro dir
+// 4. Copy server _astro into dist/client/_astro-server/
 const srcServerAstro = join(serverDir, "_astro");
 if (existsSync(srcServerAstro)) {
-    cpSync(srcServerAstro, join(root, "_astro-server"), { recursive: true });
-    console.log("✅ Copied server _astro");
+    cpSync(srcServerAstro, join(clientDir, "_astro-server"), { recursive: true });
+    console.log("✅ server _astro → dist/client/_astro-server/");
 }
 
-console.log("\n📁 dist/ structure ready for Cloudflare Pages");
+console.log("\n📁 Output directory: dist/client/");
+console.log("   Set this in Cloudflare Pages dashboard → Build settings → Output directory");
