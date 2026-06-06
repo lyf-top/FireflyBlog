@@ -5,22 +5,12 @@
  * _worker.js in dist/client/ during "Rearranging server assets".
  * We should NOT overwrite it.
  *
- * This script only:
- * 1. Copies _routes.json into dist/client/
- * 2. That's it.
+ * Cloudflare Pages default behavior (without _routes.json):
+ * 1. First serve static files from the output directory
+ * 2. If no static file matches, route to _worker.js
+ *
+ * This is exactly what we want for SSR - static assets served directly,
+ * page routes handled by the worker. Do NOT add _routes.json.
  */
-import { existsSync, cpSync } from "node:fs";
-import { join, resolve } from "node:path";
-
-const clientDir = resolve("dist", "client");
-
-// Only copy _routes.json to dist/client/
-const routesSrc = join("public", "_routes.json");
-if (existsSync(routesSrc)) {
-    cpSync(routesSrc, join(clientDir, "_routes.json"));
-    console.log("✅ _routes.json → dist/client/");
-} else {
-    console.log("⚠ No public/_routes.json found, skipping");
-}
-
 console.log("📁 Output directory: dist/client/");
+console.log("ℹ Using Cloudflare Pages default routing (static first, then worker)");
