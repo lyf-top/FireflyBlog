@@ -118,6 +118,8 @@ enum I18nKey {
 	bangumiNoDataDescription = "bangumiNoDataDescription",
 	bangumiEmpty = "bangumiEmpty",
 	bangumiEmptyReason = "bangumiEmptyReason",
+	bangumiFetchError = "bangumiFetchError",
+	bangumiFetchErrorDesc = "bangumiFetchErrorDesc",
 	bangumiUsername = "bangumiUsername",
 	bangumiApi = "bangumiApi",
 	bangumiConfigTip = "bangumiConfigTip",

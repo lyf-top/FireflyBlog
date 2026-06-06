@@ -1,6 +1,8 @@
 import sitemap from "@astrojs/sitemap";
 import svelte from "@astrojs/svelte";
-import vercel from "@astrojs/vercel";
+import { unified } from "@astrojs/markdown-remark";
+import cloudflare from "@astrojs/cloudflare";
+import node from "@astrojs/node";
 import tailwindcss from "@tailwindcss/vite";
 import { setMaxListeners } from "node:events";
 import { pluginCollapsibleSections } from "@expressive-code/plugin-collapsible-sections";
@@ -55,7 +57,13 @@ export default defineConfig({
 	base: "/",
 	trailingSlash: "ignore",
 	output: "server",
-	adapter: vercel(),
+	// 本地开发使用 Node.js 适配器（避免 cloudflare:workers 模块错误），生产使用 Cloudflare 适配器
+	adapter:
+		process.env.NODE_ENV === "development"
+			? node({ mode: "standalone" })
+			: cloudflare({
+					prerenderEnvironment: "node",
+				}),
 
 	// 图像优化配置
 	image: {
@@ -107,6 +115,7 @@ export default defineConfig({
 				"fa7-solid": ["*"],
 				"simple-icons": ["*"],
 				mdi: ["*"],
+				mingcute: ["*"],
 			},
 		}),
 		expressiveCode({
@@ -204,68 +213,61 @@ export default defineConfig({
 		mdx(),
 	],
 	markdown: {
-		remarkPlugins: [
-			remarkMath,
-			remarkReadingTime,
-			remarkImageGrid,
-			remarkExcerpt,
-			remarkDirective,
-			remarkSectionize,
-			parseDirectiveNode,
-			remarkMermaid,
-			[remarkPlantuml, plantumlConfig],
-		],
-		rehypePlugins: [
-			[rehypeKatex, { katex }],
-			[rehypeCallouts, { theme: siteConfig.rehypeCallouts.theme }],
-			rehypeSlug,
-			rehypeMermaid,
-			rehypePlantuml,
-			rehypeFigure,
-			rehypeHeadingNumbering,
-			[rehypeExternalLinks, { siteUrl: siteConfig.site_url }],
-			[rehypeEmailProtection, { method: "base64" }], // 邮箱保护插件，支持 'base64' 或 'rot13'
-			[
-				rehypeComponents,
-				{
-					components: {
-						github: GithubCardComponent,
-					},
-				},
+		processor: unified({
+			remarkPlugins: [
+				remarkMath,
+				remarkReadingTime,
+				remarkImageGrid,
+				remarkExcerpt,
+				remarkDirective,
+				remarkSectionize,
+				parseDirectiveNode,
+				remarkMermaid,
+				[remarkPlantuml, plantumlConfig],
 			],
-			[
-				rehypeAutolinkHeadings,
-				{
-					behavior: "append",
-					properties: {
-						className: ["anchor"],
-					},
-					content: {
-						type: "element",
-						tagName: "span",
-						properties: {
-							className: ["anchor-icon"],
-							"data-pagefind-ignore": true,
+			rehypePlugins: [
+				[rehypeKatex, { katex }],
+				[rehypeCallouts, { theme: siteConfig.rehypeCallouts.theme }],
+				rehypeSlug,
+				rehypeMermaid,
+				rehypePlantuml,
+				rehypeFigure,
+				rehypeHeadingNumbering,
+				[rehypeExternalLinks, { siteUrl: siteConfig.site_url }],
+				[rehypeEmailProtection, { method: "base64" }], // 邮箱保护插件，支持 'base64' 或 'rot13'
+				[
+					rehypeComponents,
+					{
+						components: {
+							github: GithubCardComponent,
 						},
-						children: [
-							{
-								type: "text",
-								value: "#",
-							},
-						],
 					},
-				},
+				],
+				[
+					rehypeAutolinkHeadings,
+					{
+						behavior: "append",
+						properties: {
+							className: ["anchor"],
+						},
+						content: {
+							type: "element",
+							tagName: "span",
+							properties: {
+								className: ["anchor-icon"],
+								"data-pagefind-ignore": true,
+							},
+							children: [
+								{
+									type: "text",
+									value: "#",
+								},
+							],
+						},
+					},
+				],
 			],
-			rehypeImageAttrs,
-			[
-				rehypeImageFallback,
-				{
-					enable: false, // 默认关闭，需要时在下方配置主力/备用图床域名
-					originalDomain: "",
-					fallbackDomain: "",
-				},
-			],
-		],
+		}),
 	},
 	vite: {
 		plugins: [tailwindcss()],

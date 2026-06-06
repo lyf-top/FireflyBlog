@@ -122,6 +122,8 @@ export const ja: Translation = {
 	[Key.bangumiEmpty]: "データなし",
 	[Key.bangumiEmptyReason]:
 		"考えられる理由：ユーザー名が存在しない、ネットワーク接続の問題、またはAPI制限",
+	[Key.bangumiFetchError]: "Bangumi データ取得失敗",
+	[Key.bangumiFetchErrorDesc]: "ネットワーク接続と API 設定を確認してください",
 	[Key.bangumiUsername]: "ユーザー名",
 	[Key.bangumiApi]: "API",
 	[Key.bangumiConfigTip]:

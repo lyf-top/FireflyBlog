@@ -122,6 +122,8 @@ export const ru: Translation = {
 	[Key.bangumiEmpty]: "Нет данных",
 	[Key.bangumiEmptyReason]:
 		"Возможные причины: имя пользователя не существует, проблема с подключением к сети или ограничение API",
+	[Key.bangumiFetchError]: "Ошибка загрузки данных Bangumi",
+	[Key.bangumiFetchErrorDesc]: "Проверьте подключение к сети и конфигурацию API",
 	[Key.bangumiUsername]: "Имя пользователя",
 	[Key.bangumiApi]: "API",
 	[Key.bangumiConfigTip]:
