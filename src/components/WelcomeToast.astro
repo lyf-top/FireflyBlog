@@ -1,0 +1,203 @@
+---
+// WelcomeToast.astro
+// 空的 frontmatter，所有逻辑都在浏览器端
+---
+
+<script is:inline>
+  const VISIT_SESSION_KEY = 'blog_visit_flag';
+  let hasShownToast = false;
+
+  function createWelcomeToast() {
+    const toast = document.createElement('div');
+    toast.id = 'welcome-toast';
+    toast.className = 'welcome-toast';
+    toast.innerHTML = `
+      <div class="welcome-toast-card">
+        <div class="welcome-toast-emoji">👋</div>
+        <div class="welcome-toast-content">
+          <div class="welcome-toast-greeting">正在加载...</div>
+          <div class="welcome-toast-subtitle">欢迎来到我的博客</div>
+        </div>
+        <button class="welcome-toast-close" onclick="closeWelcomeToast()">×</button>
+      </div>
+    `;
+    document.body.appendChild(toast);
+    return toast;
+  }
+
+  function closeWelcomeToast() {
+    const toast = document.getElementById('welcome-toast');
+    if (toast) {
+      toast.classList.remove('show');
+      toast.classList.add('hide');
+      setTimeout(() => toast.remove(), 500);
+    }
+  }
+
+  async function fetchLocation() {
+    try {
+      const response = await fetch('https://ipapi.co/json/');
+      const data = await response.json();
+      return {
+        city: data.city,
+        region: data.region,
+        country: data.country_name
+      };
+    } catch (error) {
+      console.error('获取位置信息失败:', error);
+      return null;
+    }
+  }
+
+  async function showWelcomeToast() {
+    if (hasShownToast) return;
+    hasShownToast = true;
+
+    const toast = createWelcomeToast();
+    setTimeout(() => toast.classList.add('show'), 100);
+
+    const location = await fetchLocation();
+    const greeting = toast.querySelector('.welcome-toast-greeting');
+
+    if (location) {
+      greeting.textContent = `你好，来自${location.city || location.region || location.country}的朋友！`;
+    } else {
+      greeting.textContent = '你好，欢迎访问！';
+    }
+
+    setTimeout(closeWelcomeToast, 5000);
+  }
+
+  function initWelcome() {
+    if (sessionStorage.getItem(VISIT_SESSION_KEY)) return;
+    sessionStorage.setItem(VISIT_SESSION_KEY, '1');
+    showWelcomeToast();
+  }
+
+  // 兼容 Swup 的 SPA 导航
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initWelcome);
+    document.addEventListener('astro:page-load', initWelcome);
+  } else {
+    initWelcome();
+  }
+
+  // 挂载到 window 上供内联 onclick 调用
+  window.closeWelcomeToast = closeWelcomeToast;
+</script>
+
+<style>
+  .welcome-toast {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 50;
+    transform: translateX(120%);
+    transition: transform 0.5s ease-out;
+  }
+
+  .welcome-toast.show {
+    transform: translateX(0);
+  }
+
+  .welcome-toast.hide {
+    transform: translateX(120%);
+  }
+
+  .welcome-toast-card {
+    background: var(--card-bg, #fff);
+    border: 1px solid var(--line-divider, rgba(0, 0, 0, 0.1));
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 280px;
+    max-width: 360px;
+  }
+
+  .welcome-toast-emoji {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .welcome-toast-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .welcome-toast-greeting {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary, #1f2937);
+    line-height: 1.4;
+  }
+
+  .welcome-toast-subtitle {
+    font-size: 0.75rem;
+    color: var(--text-secondary, #6b7280);
+    margin-top: 0.25rem;
+  }
+
+  .welcome-toast-close {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: var(--text-secondary, #6b7280);
+    cursor: pointer;
+    padding: 0.25rem;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: color 0.2s;
+  }
+
+  .welcome-toast-close:hover {
+    color: var(--text-primary, #1f2937);
+  }
+
+  /* 深色模式 */
+  :root.dark .welcome-toast-card {
+    background: var(--card-bg, #1f2937);
+    border-color: var(--line-divider, rgba(255, 255, 255, 0.1));
+  }
+
+  :root.dark .welcome-toast-greeting {
+    color: var(--text-primary, #f9fafb);
+  }
+
+  :root.dark .welcome-toast-subtitle {
+    color: var(--text-secondary, #9ca3af);
+  }
+
+  :root.dark .welcome-toast-close {
+    color: var(--text-secondary, #9ca3af);
+  }
+
+  :root.dark .welcome-toast-close:hover {
+    color: var(--text-primary, #f9fafb);
+  }
+
+  /* 移动端适配 */
+  @media (max-width: 640px) {
+    .welcome-toast {
+      bottom: 1rem;
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%) translateY(120%);
+    }
+
+    .welcome-toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .welcome-toast.hide {
+      transform: translateX(-50%) translateY(120%);
+    }
+
+    .welcome-toast-card {
+      width: 90vw;
+      max-width: none;
+    }
+  }
+</style>
