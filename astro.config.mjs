@@ -2,8 +2,6 @@ import sitemap from "@astrojs/sitemap";
 import svelte from "@astrojs/svelte";
 import { unified } from "@astrojs/markdown-remark";
 import cloudflare from "@astrojs/cloudflare";
-import node from "@astrojs/node";
-import vercel from "@astrojs/vercel";
 import tailwindcss from "@tailwindcss/vite";
 import { setMaxListeners } from "node:events";
 import { pluginCollapsibleSections } from "@expressive-code/plugin-collapsible-sections";
@@ -57,17 +55,12 @@ export default defineConfig({
 	site: siteConfig.site_url,
 	base: "/",
 	trailingSlash: "always",
-	output: "server",
-	// 适配器选择：开发→Node.js，Vercel→Vercel，Cloudflare→Cloudflare
-	adapter: (() => {
-		if (process.env.NODE_ENV === "development") {
-			return node({ mode: "standalone" });
-		}
-		if (process.env.VERCEL === "1") {
-			return vercel();
-		}
-		return cloudflare({ prerenderEnvironment: "node" });
-	})(),
+
+	adapter: process.env.CF_WORKERS
+		? cloudflare({
+				prerenderEnvironment: "node",
+			})
+		: undefined,
 
 	// 图像优化配置
 	image: {

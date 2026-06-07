@@ -1,5 +1,6 @@
 {
   "buildCommand": "pnpm build",
+  "outputDirectory": "dist",
   "installCommand": "pnpm install",
   "framework": "astro",
   "headers": [
@@ -34,5 +35,5 @@
       ]
     }
   ],
-  "cleanUrls": false
+  "cleanUrls": true
 }
