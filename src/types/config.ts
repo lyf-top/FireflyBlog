@@ -445,7 +445,8 @@ export type WidgetComponentType =
 	| "advertisement"
 	| "stats"
 	| "calendar"
-	| "music";
+	| "music"
+	| "relationship";
 
 export type WidgetComponentConfig = {
 	type: WidgetComponentType; // 组件类型
@@ -814,6 +815,16 @@ export type SponsorConfig = {
 	showSponsorsList?: boolean; // 是否显示赞助者列表，默认 true
 	showComment?: boolean; // 是否显示评论区，默认 false
 	showButtonInPost?: boolean; // 是否在文章详情页底部显示赞助按钮，默认 true
+};
+
+// 恋爱倒计时配置
+export type RelationshipConfig = {
+	startDate: string; // 恋爱开始日期，格式：YYYY-MM-DD
+	name1: string; // 第一个人的名字
+	name2: string; // 第二个人的名字
+	avatar1: string; // 第一个人的头像 URL
+	avatar2: string; // 第二个人的头像 URL
+	title?: string; // 小组件标题
 };
 
 // 响应式图像布局类型
