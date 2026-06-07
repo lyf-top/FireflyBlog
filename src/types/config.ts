@@ -174,6 +174,13 @@ export type SiteConfig = {
 		image: string;
 		external?: boolean;
 	}>;
+
+	// 开发者工具提示信息配置
+	devtoolsWarning?: {
+		enable: boolean; // 是否启用
+		message?: string; // 提示信息内容，留空为默认
+		time?: number; // 提示信息显示时间，单位秒
+	};
 };
 
 export type Favicon = {

@@ -1,5 +1,6 @@
 ---
 import Live2DWidget from "@components/features/Live2DWidget.astro";
+import DevToolsWarning from "@components/features/DevToolsWarning.astro";
 
 import SpineModel from "@components/features/SpineModel.astro";
 import Footer from "@components/layout/Footer.astro";
@@ -896,6 +897,7 @@ const bannerCarouselInterval = Math.max(
 
         <SpineModel></SpineModel>
         {live2dWidgetConfig.enable && <Live2DWidget config={live2dWidgetConfig} />}
+        {siteConfig.devtoolsWarning?.enable && <DevToolsWarning />}
     </div>
 </div>
 

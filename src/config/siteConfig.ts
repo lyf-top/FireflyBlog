@@ -280,4 +280,11 @@ export const siteConfig: SiteConfig = {
 		// 	external: true,
 		// },
 	],
+
+	// 开发者工具提示信息配置
+	devtoolsWarning: {
+		enable: true, // 是否启用
+		message: "请按本站规定合法使用开发者工具", // 提示信息内容
+		time: 3, // 提示信息显示时间，单位秒
+	},
 };
