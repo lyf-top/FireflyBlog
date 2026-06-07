@@ -3,6 +3,7 @@ import svelte from "@astrojs/svelte";
 import { unified } from "@astrojs/markdown-remark";
 import cloudflare from "@astrojs/cloudflare";
 import node from "@astrojs/node";
+import vercel from "@astrojs/vercel";
 import tailwindcss from "@tailwindcss/vite";
 import { setMaxListeners } from "node:events";
 import { pluginCollapsibleSections } from "@expressive-code/plugin-collapsible-sections";
@@ -57,13 +58,16 @@ export default defineConfig({
 	base: "/",
 	trailingSlash: "always",
 	output: "server",
-	// 本地开发使用 Node.js 适配器（避免 cloudflare:workers 模块错误），生产使用 Cloudflare 适配器
-	adapter:
-		process.env.NODE_ENV === "development"
-			? node({ mode: "standalone" })
-			: cloudflare({
-					prerenderEnvironment: "node",
-				}),
+	// 适配器选择：开发→Node.js，Vercel→Vercel，Cloudflare→Cloudflare
+	adapter: (() => {
+		if (process.env.NODE_ENV === "development") {
+			return node({ mode: "standalone" });
+		}
+		if (process.env.VERCEL === "1") {
+			return vercel();
+		}
+		return cloudflare({ prerenderEnvironment: "node" });
+	})(),
 
 	// 图像优化配置
 	image: {
