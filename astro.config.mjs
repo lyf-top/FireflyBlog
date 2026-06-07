@@ -55,7 +55,7 @@ if (process.env.NODE_ENV === "development") {
 export default defineConfig({
 	site: siteConfig.site_url,
 	base: "/",
-	trailingSlash: "ignore",
+	trailingSlash: "always",
 	output: "server",
 	// 本地开发使用 Node.js 适配器（避免 cloudflare:workers 模块错误），生产使用 Cloudflare 适配器
 	adapter:
