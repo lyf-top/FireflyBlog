@@ -100,14 +100,14 @@ export class TOCManager {
 	}
 
 	/**
-	 * 生成徽章内容
+	 * 生成编号内容
 	 */
-	private generateBadgeContent(depth: number, counts: number[]): string {
+	private generateNumberContent(depth: number, counts: number[]): string {
 		const relativeDepth = depth - this.minDepth;
 
-		// 构建编号：例如 depth=3, minDepth=1 → "1.2.3"
+		// 构建编号：例如 depth=3, minDepth=1 → "2.1.1"
 		const parts = counts.slice(0, relativeDepth + 1);
-		return parts.join('.');
+		return parts.join('.') + '.';
 	}
 
 	/**
@@ -179,7 +179,7 @@ export class TOCManager {
 				return;
 			}
 
-			const badgeContent = this.generateBadgeContent(depth, counts);
+			const numberContent = this.generateNumberContent(depth, counts);
 
 			let headingText = this.getCleanTextContent(heading)
 				.replace(/#+\s*$/, "")
@@ -210,25 +210,17 @@ export class TOCManager {
 			// 使用 relativeDepth 作为层级（0=一级，1=二级，2=三级...）
 			const tocLevel = relativeDepth;
 
-			// 检查是否有子标题（通过预计算或简单判断）
-			// 这里先添加 data-depth 属性，稍后在 bindClickEvents 中处理折叠
-			const hasChildren = this.headingHasChildren(heading, filteredHeadings, index);
-
 			tocHTML += `
         <a
           href="#${heading.id}"
-			  class="toc-item toc-level-${tocLevel}"
+          class="toc-item toc-level-${tocLevel}"
           data-heading-id="${heading.id}"
-		  data-depth="${relativeDepth}"
-		  data-has-children="${hasChildren}"
-		  aria-label="${escapedHeadingText}"
-		  title="${escapedHeadingText}"
+          data-depth="${relativeDepth}"
+          aria-label="${escapedHeadingText}"
+          title="${escapedHeadingText}"
         >
-			  <div class="toc-badge ${relativeDepth === 0 ? "toc-badge-index" : ""}">
-            ${badgeContent}
-          </div>
-			  <div class="toc-label ${relativeDepth <= 1 ? "toc-label-primary" : "toc-label-secondary"}">${headingText}</div>
-			  ${hasChildren ? '<svg class="toc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>' : ''}
+          <span class="toc-number">${numberContent}</span>
+          <span class="toc-label ${relativeDepth <= 1 ? "toc-label-primary" : "toc-label-secondary"}">${headingText}</span>
         </a>
       `;
 		});
@@ -456,129 +448,10 @@ export class TOCManager {
 	 */
 	public bindClickEvents(): void {
 		this.tocItems.forEach((item) => {
-			// 点击标题链接 - 滚动到对应位置
 			item.addEventListener("click", (e) => {
-				// 如果点击的是箭头，不滚动，只处理折叠
-				if ((e.target as Element).closest('.toc-arrow')) {
-					e.preventDefault();
-					e.stopPropagation();
-					this.toggleCollapse(item as HTMLElement);
-					return;
-				}
 				this.handleClick(e);
 			});
 		});
-
-		// 初始化折叠状态：默认折叠二级及以下标题
-		this.initCollapseState();
-	}
-
-	/**
-	 * 初始化折叠状态
-	 */
-	private initCollapseState(): void {
-		this.tocItems.forEach((item) => {
-			const depth = parseInt(item.getAttribute('data-depth') || '0');
-			const hasChildren = item.getAttribute('data-has-children') === 'true';
-
-			// 一级标题（depth=0）如果有子标题，默认展开
-			// 二级及以下标题默认隐藏
-			if (depth === 0 && hasChildren) {
-				// 一级标题默认展开，不做处理
-			} else if (depth >= 1) {
-				// 检查父级是否折叠
-				if (!this.isParentExpanded(item as HTMLElement)) {
-					(item as HTMLElement).style.display = 'none';
-				}
-			}
-		});
-	}
-
-	/**
-	 * 检查父级是否展开
-	 */
-	private isParentExpanded(item: HTMLElement): boolean {
-		const depth = parseInt(item.getAttribute('data-depth') || '0');
-		if (depth === 0) return true;
-
-		// 查找前一个同级或父级元素
-		let prev = item.previousElementSibling as HTMLElement;
-		while (prev) {
-			const prevDepth = parseInt(prev.getAttribute('data-depth') || '0');
-			if (prevDepth < depth) {
-				// 找到父级，检查是否折叠
-				return !prev.classList.contains('collapsed');
-			}
-			prev = prev.previousElementSibling as HTMLElement;
-		}
-
-		return true;
-	}
-
-	/**
-	 * 切换折叠状态
-	 */
-	private toggleCollapse(item: HTMLElement): void {
-		const depth = parseInt(item.getAttribute('data-depth') || '0');
-		const hasChildren = item.getAttribute('data-has-children') === 'true';
-
-		if (!hasChildren) return;
-
-		const isCollapsed = item.classList.contains('collapsed');
-
-		if (isCollapsed) {
-			// 展开：显示所有直接子级
-			item.classList.remove('collapsed');
-			this.showChildren(item, depth);
-		} else {
-			// 折叠：隐藏所有子级
-			item.classList.add('collapsed');
-			this.hideChildren(item, depth);
-		}
-	}
-
-	/**
-	 * 显示子标题
-	 */
-	private showChildren(parentItem: HTMLElement, parentDepth: number): void {
-		let next = parentItem.nextElementSibling as HTMLElement;
-		while (next) {
-			const nextDepth = parseInt(next.getAttribute('data-depth') || '0');
-
-			// 如果遇到同级或更高级别的标题，停止
-			if (nextDepth <= parentDepth) break;
-
-			// 只显示直接子级（depth = parentDepth + 1）
-			if (nextDepth === parentDepth + 1) {
-				next.style.display = '';
-				// 如果子级是展开状态，也显示它的子级
-				if (!next.classList.contains('collapsed')) {
-					this.showChildren(next, nextDepth);
-				}
-			}
-
-			next = next.nextElementSibling as HTMLElement;
-		}
-	}
-
-	/**
-	 * 隐藏子标题
-	 */
-	private hideChildren(parentItem: HTMLElement, parentDepth: number): void {
-		let next = parentItem.nextElementSibling as HTMLElement;
-		while (next) {
-			const nextDepth = parseInt(next.getAttribute('data-depth') || '0');
-
-			// 如果遇到同级或更高级别的标题，停止
-			if (nextDepth <= parentDepth) break;
-
-			// 隐藏所有子级
-			next.style.display = 'none';
-			// 重置折叠状态
-			next.classList.remove('collapsed');
-
-			next = next.nextElementSibling as HTMLElement;
-		}
 	}
 
 	/**

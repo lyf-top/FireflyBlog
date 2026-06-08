@@ -13,7 +13,7 @@
 .toc-content {
 	display: flex;
 	flex-direction: column;
-	gap: 0.28rem;
+	gap: 0.15rem;
 	position: relative;
 	overflow: visible;
 	width: 100%;
@@ -27,14 +27,13 @@
 /* TOC 链接样式 */
 .toc-item {
 	display: flex;
-	align-items: center;
-	gap: 0.75rem;
+	align-items: baseline;
+	gap: 0.4rem;
 	text-decoration: none;
 	color: inherit;
-	border-radius: 0.875rem;
+	border-radius: 0.5rem;
 	transition:
 		background-color 0.14s ease,
-		transform 0.14s ease,
 		color 0.14s ease;
 	width: 100%;
 	min-width: 0;
@@ -43,128 +42,88 @@
 	overflow: hidden;
 	box-sizing: border-box;
 	position: relative;
-	padding: 0.48rem 0.62rem;
-	min-height: 2.2rem;
+	padding: 0.4rem 0.5rem;
+	min-height: 2rem;
 	cursor: pointer;
 }
 
 .toc-item:hover {
 	background: color-mix(in oklab, var(--toc-btn-hover), transparent);
-	transform: translateX(1px);
 }
 
 .toc-item:active {
 	background: color-mix(in oklab, var(--toc-btn-active), transparent);
 }
 
+/* 缩进级别 */
+.toc-item.toc-level-0 {
+	padding-left: 0.5rem;
+}
+
 .toc-item.toc-level-1 {
-	padding-left: 1.08rem;
+	padding-left: 1.2rem;
 }
 
 .toc-item.toc-level-2 {
-	padding-left: 1.62rem;
+	padding-left: 1.9rem;
 }
 
 .toc-item.toc-level-3 {
-	padding-left: 2.16rem;
+	padding-left: 2.6rem;
 }
 
 .toc-item.toc-level-4 {
-	padding-left: 2.7rem;
+	padding-left: 3.3rem;
 }
 
 .toc-item.toc-level-5 {
-	padding-left: 3.24rem;
+	padding-left: 4.0rem;
 }
 
+/* 编号样式 */
+.toc-number {
+	font-size: 0.86rem;
+	font-weight: 600;
+	color: color-mix(in oklab, var(--content-meta) 70%, var(--primary));
+	flex-shrink: 0;
+	white-space: nowrap;
+	line-height: 1.4;
+}
+
+/* 标签样式 */
 .toc-label {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	min-width: 0;
 	flex: 1;
-	max-width: calc(100% - 2.4rem);
+	max-width: calc(100% - 3rem);
 	box-sizing: border-box;
 	font-size: 0.86rem;
-	line-height: 1.3;
+	line-height: 1.4;
 	letter-spacing: 0.01em;
 }
 
 .toc-label-primary {
-	color: color-mix(in oklab, var(--content-meta) 78%, var(--primary));
+	color: color-mix(in oklab, var(--content-meta) 75%, var(--primary));
+	font-weight: 500;
 }
 
 .toc-label-secondary {
-	color: color-mix(in oklab, var(--content-meta) 88%, transparent);
+	color: color-mix(in oklab, var(--content-meta) 85%, transparent);
 }
 
-/* 折叠/展开样式 */
-.toc-item.collapsed + .toc-item[data-depth] {
-	display: none;
+/* 活动状态 */
+.toc-item.visible {
+	background: color-mix(in oklab, var(--primary) 12%, transparent);
 }
 
-.toc-item.collapsed .toc-arrow {
-	transform: rotate(-90deg);
-}
-
-.toc-arrow {
-	width: 1rem;
-	height: 1rem;
-	flex-shrink: 0;
-	transition: transform 0.2s ease;
-	opacity: 0.5;
-}
-
-.toc-arrow.expanded {
-	transform: rotate(90deg);
-}
-
-.toc-badge {
-	display: grid;
-	place-items: center;
-	flex-shrink: 0;
-	width: 1.35rem;
-	height: 1.35rem;
-	border-radius: 0.5rem;
-	font-size: 0.68rem;
-	font-weight: 700;
-	line-height: 1;
-	color: color-mix(in oklab, var(--content-meta) 60%, var(--primary));
-}
-
-.toc-badge-index {
-	background: var(--toc-badge-bg);
-	color: var(--btn-content);
-}
-
-.toc-badge-sub {
-	font-size: 0.6rem;
-	width: auto;
-	min-width: 1.35rem;
-	padding: 0 0.2rem;
-}
-
-.toc-badge-dot {
-	width: 0.48rem;
-	height: 0.48rem;
-	border-radius: 999px;
-	background: color-mix(in oklab, var(--primary) 26%, var(--line-color));
-}
-
-.toc-badge-dot-sm {
-	width: 0.34rem;
-	height: 0.34rem;
-	background: color-mix(in oklab, var(--primary) 16%, var(--line-color));
+.toc-item.visible .toc-number {
+	color: var(--primary);
 }
 
 .toc-item.visible .toc-label {
-	color: color-mix(in oklab, var(--content-meta) 58%, var(--primary));
-	opacity: 1;
-}
-
-.toc-item.visible .toc-badge-dot,
-.toc-item.visible .toc-badge-dot-sm {
-	background: var(--primary);
+	color: var(--primary);
 }
 
 /* 活动指示器基础样式 */
@@ -172,36 +131,39 @@
 	position: absolute;
 	left: 0;
 	right: 0;
-	background: color-mix(in oklab, var(--toc-indicator-bg), transparent);
-	border-radius: 0.875rem;
+	background: color-mix(in oklab, var(--primary) 10%, transparent);
+	border-radius: 0.5rem;
 	transition: top 0.18s ease, height 0.18s ease, opacity 0.14s ease;
-	box-shadow: 0 6px 18px -14px color-mix(in oklab, var(--primary) 55%, transparent);
 	z-index: -1;
 }
 
 @media (max-width: 768px) {
 	.toc-item {
-		padding: 0.44rem 0.58rem;
-		border-radius: 0.78rem;
+		padding: 0.36rem 0.45rem;
+		border-radius: 0.45rem;
+	}
+
+	.toc-item.toc-level-0 {
+		padding-left: 0.45rem;
 	}
 
 	.toc-item.toc-level-1 {
-		padding-left: 0.94rem;
+		padding-left: 1.0rem;
 	}
 
 	.toc-item.toc-level-2 {
-		padding-left: 1.34rem;
+		padding-left: 1.55rem;
 	}
 
 	.toc-item.toc-level-3 {
-		padding-left: 1.74rem;
+		padding-left: 2.1rem;
 	}
 
 	.toc-item.toc-level-4 {
-		padding-left: 2.14rem;
+		padding-left: 2.65rem;
 	}
 
 	.toc-item.toc-level-5 {
-		padding-left: 2.54rem;
+		padding-left: 3.2rem;
 	}
 }
