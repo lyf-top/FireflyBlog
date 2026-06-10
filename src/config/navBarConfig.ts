@@ -50,29 +50,27 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 		icon: "material-symbols:camera-outdoor",
 		children: [
 			{
-				name: "书架",
-				url: "/books/",
-				icon: "material-symbols:book-5",
+				name: "图床",
+				url: "https://imgbed.f3f3.top",
+				icon: "material-symbols:image",
+				external: true,
 			},
 			{
-				name: "影视与游戏",
-				url: "/movies-games/",
+				name: "网站导航",
+				url: "https://site.f3f3.top",
+				icon: "material-symbols:explore",
+				external: true,
+			},
+			{
+				name: "影视",
+				url: "https://tv.f3f3.top",
 				icon: "material-symbols:movie",
+				external: true,
 			},
 			{
 				name: "音乐",
 				url: "/music/",
 				icon: "material-symbols:music-note",
-			},
-			{
-				name: "更新日志",
-				url: "/changelog/",
-				icon: "material-symbols:history",
-			},
-			{
-				name: "规划",
-				url: "/life/routines/",
-				icon: "material-symbols:list-alt",
 			},
 			{
 				name: "足迹",
@@ -94,16 +92,6 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 			...(siteConfig.pages.friends ? [LinkPreset.Friends] : []),
 			// 根据配置决定是否添加赞助，在siteConfig关闭pages.sponsor时导航栏不显示赞助
 			...(siteConfig.pages.sponsor ? [LinkPreset.Sponsor] : []),
-			// 根据配置决定是否添加应用中心
-			...(siteConfig.pages.apps
-				? [
-						{
-							name: "应用",
-							url: "/apps/",
-							icon: "material-symbols:apps",
-						},
-					]
-				: []),
 		],
 	});
 

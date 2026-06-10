@@ -18,7 +18,8 @@ updated: 2026-03-12 10:43:03
 
 ##  javase
 
-- 命名规范![](https://img.f3f3.top/picgo/20260417131018489.png)
+- 命名规范
+- ![](https://img.f3f3.top/picgo/20260417131018489.png)
 
 ###  编写helloworld
 
