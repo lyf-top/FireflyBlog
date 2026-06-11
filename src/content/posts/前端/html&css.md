@@ -2,7 +2,7 @@
 
 title: html&css
 description: 🥧前端学习之路开启
-image: 'https://img.f3f3.top/img/2026/04/28/f9883aea1b5e1f5907455e3c5243c3a8.webp'#文章封面页
+image: 'https://img.f3f3.top/img/2026/05/30/c0ea19f2cdca9df36e06e29b1c2684a4.webp'#文章封面页
 tags:
   - 前端基础
 category: 前端  

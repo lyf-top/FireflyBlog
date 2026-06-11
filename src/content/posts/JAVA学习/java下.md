@@ -1,7 +1,7 @@
 ---
 title: java学习笔记下
 description: 🥧java学习之路开启
-image: 'https://img.f3f3.top/img/2026/05/10/47777df32b45be53db5473bd0fb17004.webp'
+image:'https://img.f3f3.top/img/2026/05/30/1a72c9584efc33df05646f80d12384e5.webp'
 #文章封面页
 tags:
   - java基础
@@ -2552,18 +2552,654 @@ String joinCity = userList.stream().map(User::getCity).collect(Collectors.joinin
 
 ### IO流概述
 
+![image.webp](https://imgbed.f3f3.top/file/picgo/1781158347748_image.webp)
+
 <details>
 <summary style="cursor:pointer; font-weight:bold; color:var(--primary);">初识IO流</summary>
+数据的传输可以看做是一种数据的流动，按照流动的方向，以内存为基准，分为`输入input` 和`输出output` ，即流向内存是输入流，流出内存的输出流。
 
+Java中I/O操作主要是指使用`java.io`包下的内容，进行输入、输出操作。**输入**也叫做**读取**数据，**输出**也叫做作**写出**数据。
 
+根据数据的**流向**分为：输入流和输出流。
 
+- **输入流** ：把数据从`其他设备`上读取到`内存`中的流。
+- **输出流** ：把数据从`内存` 中写出到`其他设备`上的流。
 
+格局数据的**类型**分为：字节流和字符流。
 
-
-
-
+- **字节流** ：以字节为单位，读写数据的流。
+- **字符流** ：以字符为单位，读写数据的流
 
 </details>
+
+### 顶级父类
+
+| 输入流     | 输出流                    |                            |
+| :--------- | ------------------------- | -------------------------- |
+| **字节流** | 字节输入流**InputStream** | 字节输出流**OutputStream** |
+| **字符流** | 字符输入流**Reader**      | 字符输出流**Writer**       |
+
+一个简单的方法判断文件存储是否是字符流：将文件使用Windows 自带的文本编辑器打开，能直接看懂的是字符流，不能直接看懂的（比如乱码）是字节流。
+
+### 字节流
+
+> 字节流读取文件的时候，文件中不要有中文。
+
+一切文件数据（文本、图片、视频等）在存储时，都是以二进制数字的形式保存，都一个一个的字节，那么传输时一样如此。所以，字节流可以传输任意文件数据
+
+#### 字节输出流OutputStream
+
+<details>
+<summary style="cursor:pointer; font-weight:bold; color:var(--primary);">初识字节输出流</summary>
+
+java.io.OutputStream 抽象类是表示字节输出流的所有类的超类，将指定的字节信息写出到目的地。它定义了字节输出流的基本共性功能方法。
+
+public void close() ：关闭此输出流并释放与此流相关联的任何系统资源。
+public void flush() ：刷新此输出流并强制任何缓冲的输出字节被写出。
+public void write(byte[] b)：将 b.length字节从指定的字节数组写入此输出流。
+public void write(byte[] b, int off, int len) ：从指定的字节数组写入 len字节，从偏移量 off开始输出到此输出流。
+public abstract void write(int b) ：将指定的字节输出流。
+对于close方法：当完成流的操作时，必须调用此方法，释放系
+</details>
+
+####  FileOutputStream类
+
+<details>
+<summary style="cursor:pointer; font-weight:bold; color:var(--primary);">认识fileoutstream</summary>
+
+OutputStream有很多子类，从最简单的一个子类开始。java.io.FileOutputStream 类是文件输出流，用于将数据写出到文件。
+
+2.3.1 构造方法
+public FileOutputStream(File file)：创建文件输出流以写入由指定的 File对象表示的文件。
+public FileOutputStream(String name)： 创建文件输出流以指定的名称写入文件。
+当你创建一个流对象时，必须传入一个文件路径 。该路径下，如果没有这个文件，会创建该文件。如果有这个文件，会清空这个文件的数据。
+</details>
+
+```
+public class FileOutputStreamConstructor throws IOException {
+    public static void main(String[] args) {
+   	 	// 使用File对象创建流对象
+        File file = new File("a.txt");
+        FileOutputStream fos = new FileOutputStream(file);
+      
+        // 使用文件名称创建流对象
+        FileOutputStream fos = new FileOutputStream("b.txt");
+    }
+}
+
+```
+
+##### **写出字节**：`write(int b)`
+
+```
+public class FileOutputStreamDemo01 {
+    public static void main(String[] args) throws IOException {
+        //1.创建对象
+        //写出 输出流 OutputStream
+        //本地文件    File
+        FileOutputStream fos = new FileOutputStream("my-io\\a.txt");
+        //2.写出数据
+        fos.write(97);
+        //3.释放资源
+        fos.close();
+    }
+}
+//每次可以写出一个字节数据
+```
+
+##### **写出字节数组**：`write(byte[] b)`
+
+```
+public class FileOutputStreamDemo03 {
+	public static void main(String[] args) throws IOException {
+        //1.创建对象
+        FileOutputStream fos = new FileOutputStream("my-io\\a.txt");
+        //2.一次写一个字节数组数据
+        byte[] bytes = {97, 98, 99, 100, 101};
+        fos.write(bytes);
+        //4.释放资源
+        fos.close();
+    }
+}
+
+```
+
+##### **写出指定长度字节数组**：`write(byte[] b, int off, int len)`
+
+```
+public class FileOutputStreamDemo03 {
+    public static void main(String[] args) throws IOException {
+        //1.创建对象
+        FileOutputStream fos = new FileOutputStream("my-io\\a.txt");
+        //2.一次写一个字节数组数据
+        byte[] bytes = {97, 98, 99, 100, 101};
+        //3.一次写一个字节数组的部分数据
+        fos.write(bytes,1,2);   // b c
+        //4.释放资源
+        fos.close();
+    }
+}
+//参数一：数组
+//参数二：起始索引  
+//参数三：个数
+```
+
+##### 数据追加续写
+
+经过以上的演示，每次程序运行，创建输出流对象，都会清空目标文件中的数据。需要在构造方法的参数传入一个boolean类型的值，true 表示追加数据，false 表示清空原有数据。这样创建的输出流对象，就可以指定是否追加续写了。
+
+public FileOutputStream(File file, boolean append)： 创建文件输出流以写入由指定的 File对象表示的文件。
+public FileOutputStream(String name, boolean append)： 创建文件输出流以指定的名称写入文件。
+
+```
+public class FileOutputStreamDemo04 {
+    public static void main(String[] args) throws IOException {
+        //1.创建对象，开启续写
+        FileOutputStream fos = new FileOutputStream("my-io\\a.txt",true);
+        //2.写出数据
+        String str = "Hello";
+        byte[] bytes = str.getBytes();
+        fos.write(bytes);
+        //3.释放资源
+        fos.close();
+    }
+}
+//bchello
+```
+
+##### 写出换行
+
+```
+public class FileOutputStreamDemo04 {
+    public static void main(String[] args) throws IOException {
+        // 使用文件名称创建流对象
+        FileOutputStream fos = new FileOutputStream("my-io\\a.txt");
+        // 定义字节数组
+        byte[] words = {97,98,99,100,101};
+        // 遍历数组
+        for (int i = 0; i < words.length; i++) {
+            // 写出一个字节
+            fos.write(words[i]);
+            // 写出一个换行, 换行符号转成数组写出
+            fos.write("\r\n".getBytes());
+        }
+        // 关闭资源
+        fos.close();
+    }
+}
+
+```
+
+#### 字节输入流 InputStream
+
+<details>
+<summary style="cursor:pointer; font-weight:bold; color:var(--primary);">初识字节输入流</summary>
+
+java.io.InputStream 抽象类是表示字节输入流的所有类的超类，可以读取字节信息到内存中。它定义了字节输入流的基本共性功能方法。
+
+public void close() ：关闭此输入流并释放与此流相关联的任何系统资源。
+public abstract int read()： 从输入流读取数据的下一个字节。
+public int read(byte[] b)： 从输入流中读取一些字节数，并将它们存储到字节数组 b中 。
+close方法，当完成流的操作时，必须调用此方法，释放系统资源
+
+</details>
+
+#### FileInputStream类
+
+##### 初识
+
+<details>
+<summary style="cursor:pointer; font-weight:bold; color:var(--primary);">初识fileoutstream</summary>
+
+java.io.FileInputStream 类是文件输入流，从文件中读取字节。
+
+2.5.1 构造方法
+创建一个流对象时，必须传入一个文件路径。该路径下，如果没有该文件，会抛出FileNotFoundException 。
+
+FileInputStream(File file)： 通过打开与实际文件的连接来创建一个 FileInputStream ，该文件由文件系统中的 File对象 file命名。
+FileInputStream(String name)： 通过打开与实际文件的连接来创建一个 FileInputStream ，该文件由文件系统中的路径名 name命名。
+
+</details>
+
+```
+public class FileInputStreamConstructor throws IOException{
+    public static void main(String[] args) {
+   	 	// 使用File对象创建流对象
+        File file = new File("a.txt");
+        FileInputStream fos = new FileInputStream(file);
+      
+        // 使用文件名称创建流对象
+        FileInputStream fos = new FileInputStream("b.txt");
+    }
+}
+
+```
+
+##### 读取字节数据
+
+```
+public class FileInputStreamDemo01 {
+    public static void main(String[] args) throws IOException {
+        //1.创建对象
+        FileInputStream fis = new FileInputStream("my-io\\a.txt");
+        //2.读取数据，返回一个字节
+        int read = fis.read();
+        System.out.println((char) read);
+        read = fis.read();
+        System.out.println((char) read);
+        read = fis.read();
+        System.out.println((char) read);
+        read = fis.read();
+        System.out.println((char) read);
+        read = fis.read();
+        System.out.println((char) read);
+        // 读取到末尾,返回-1
+        read = fis.read();
+        System.out.println( read);
+        //3.关闭资源
+        fis.close();
+    }
+}
+//read方法，每次可以读取一个字节的数据，提升为int类型，读取到文件末尾，返回-1
+//a,b,c,d,-1
+
+```
+
+##### 循环读取
+
+```
+public class FileInputStreamDemo03 {
+    public static void main(String[] args) throws IOException {
+        // 使用文件名称创建流对象
+        FileInputStream fis = new FileInputStream("my-io\\a.txt");
+        // 定义变量，保存数据
+        int b;
+        // 循环读取
+        while ((b = fis.read()) != -1) {
+            System.out.println((char) b);
+        }
+        // 关闭资源
+        fis.close();
+    }
+}
+
+```
+
+##### **使用字节数组读取**
+
+```
+public class FileInputStreamDemo05 {
+    public static void main(String[] args) throws IOException {
+
+        //1.创建对象
+        FileInputStream fis = new FileInputStream("my-io\\a.txt");
+        //2.读取数据
+        byte[] bytes = new byte[2];
+        //一次读取多个字节数据，具体读多少，跟数组的长度有关
+        //返回值：本次读取到了多少个字节数据
+        int len1 = fis.read(bytes);
+        System.out.println(len1);//2
+        String str1 = new String(bytes,0,len1);
+        System.out.println(str1);//ab
+
+        int len2 = fis.read(bytes);
+        System.out.println(len2);//2
+        String str2 = new String(bytes,0,len2);
+        System.out.println(str2);//cd
+
+        int len3 = fis.read(bytes);
+        System.out.println(len3);// 1
+        String str3 = new String(bytes,0,len3);
+        System.out.println(str3);//e
+
+        //3.释放资源
+        fis.close();
+    }
+}
+
+```
+
+##### 文件拷贝
+
+```
+public class FileInputStreamDemo04 {
+    public static void main(String[] args) throws IOException {
+        long start = System.currentTimeMillis();
+
+        //1.创建对象
+        FileInputStream fis = new FileInputStream("D:\\aaa\\movie.mp4");
+        FileOutputStream fos = new FileOutputStream("my-io\\copy.mp4");
+        //2.拷贝
+        //核心思想：边读边写
+        int b;
+        while((b = fis.read()) != -1){
+            fos.write(b);
+        }
+        //3.释放资源
+        //规则：先开的最后关闭
+        fos.close();
+        fis.close();
+
+        long end = System.currentTimeMillis();
+        System.out.println(end - start);
+    }
+}
+
+```
+
+```
+public class FileInputStreamDemo06 {
+    public static void main(String[] args) throws IOException {
+        long start = System.currentTimeMillis();
+
+        //1.创建对象
+        FileInputStream fis = new FileInputStream("D:\\aaa\\movie.mp4");
+        FileOutputStream fos = new FileOutputStream("my-io\\copy.mp4");
+        //2.拷贝
+        int len;
+        byte[] bytes = new byte[1024 * 1024 * 5];
+        while((len = fis.read(bytes)) != -1){
+            fos.write(bytes,0,len);
+        }
+        //3.释放资源
+        fos.close();
+        fis.close();
+
+        long end = System.currentTimeMillis();
+        System.out.println(end - start);
+    }
+}
+
+```
+
+### 字符流
+
+<details>
+<summary style="cursor:pointer; font-weight:bold; color:var(--primary);">初识字符流</summary>
+
+当使用字节流读取文本文件时，可能会有一个小问题。就是遇到中文字符时，可能不会显示完整的字符，那是因为一个中文字符可能占用多个字节存储。所以Java提供一些字符流类，**以字符为单位**读写数据，专门用于处理文本文件。
+
+</details>
+
+#### 字符输入流 Reader
+
+java.io.Reader抽象类是表示用于读取字符流的所有类的超类，可以读取字符信息到内存中。它定义了字符输入流的基本共性功能方法。
+
+public void close() ：关闭此流并释放与此流相关联的任何系统资源。
+public int read()： 从输入流读取一个字符。
+public int read(char[] cbuf)： 从输入流中读取一些字符，并将它们存储到字符数组 cbuf中
+
+#### FileReader类
+
+<details>
+<summary style="cursor:pointer; font-weight:bold; color:var(--primary);">初识filereader</summary>
+
+java.io.FileReader 类是读取字符文件的便利类。构造时使用系统默认的字符编码和默认字节缓冲区。
+
+字符编码：字节与字符的对应规则。Windows系统的中文编码默认是GBK编码表；idea中是Unicode字符集、UTF-8编码
+字节缓冲区：一个字节数组，用来临时存储字节数
+
+</details>
+
+创建一个流对象时，必须传入一个文件路径，类似于FileInputStream 。
+
+FileReader(File file)： 创建一个新的 FileReader ，给定要读取的File对象。
+FileReader(String fileName)： 创建一个新的 FileReader ，给定要读取的文件的名称。
+
+```
+public class FileReaderConstructor throws IOException{
+    public static void main(String[] args) {
+   	 	// 使用File对象创建流对象
+        File file = new File("a.txt");
+        FileReader fr = new FileReader(file);
+      
+        // 使用文件名称创建流对象
+        FileReader fr = new FileReader("b.txt");
+    }
+}
+
+```
+
+##### 读取字符数据
+
+```
+第一步：创建对象
+public FileReader(File file)        创建字符输入流关联本地文件
+public FileReader(String pathname)  创建字符输入流关联本地文件
+第二步：读取数据
+public int read()                   读取数据，读到末尾返回-1
+public int read(char[] buffer)      读取多个数据，读到末尾返回-1
+第三步：释放资源
+public void close()                 释放资源/关流
+
+```
+
+```
+public class FileReaderDemo01 {
+    public static void main(String[] args) throws IOException {
+
+        //1.创建对象并关联本地文件
+        FileReader fr = new FileReader("my-io\\a.txt");
+
+        /**
+         * 2.读取数据 read()
+         * 字符流的底层也是字节流，默认也是一个字节一个字节的读取的。
+         * 如果遇到中文就会一次读取多个，GBK一次读两个字节，UTF-8一次读三个字节
+         * read（）细节：
+         * 1.read():默认也是一个字节一个字节的读取的,如果遇到中文就会一次读取多个
+         * 2.在读取之后，方法的底层还会进行解码并转成十进制。
+         *   最终把这个十进制作为返回值,这个十进制的数据也表示在字符集上的数字
+         *   英文：文件里面二进制数据 0110 0001
+         *           read方法进行读取，解码并转成十进制97
+         *   中文：文件里面的二进制数据 11100110 10110001 10001001
+         *           read方法进行读取，解码并转成十进制27721
+         *  想看到中文汉字，就是把这些十进制数据，再进行强转就可以了
+         */
+
+        // 循环读取
+        int ch;
+        while((ch = fr.read()) != -1){
+            System.out.println((char)ch);
+        }
+        //3.释放资源
+        fr.close();
+    }
+}
+//虽然读取了一个字符，但是会自动提升为int类型。
+```
+
+##### **使用字符数组读取**：
+
+```
+public class FileReaderDemo02 {
+    public static void main(String[] args) throws IOException {
+
+        //1.创建对象
+        FileReader fr = new FileReader("my-io\\a.txt");
+        //2.读取数据
+        char[] chars = new char[2];
+        int len;    // 获取有效的字符
+        //read(chars)：读取数据，解码，强转三步合并了，把强转之后的字符放到数组当中
+        //空参的read + 强转类型转换
+        while((len = fr.read(chars)) != -1){
+            // 把数组中的数据变成字符串再进行打印
+            System.out.println(new String(chars,0,len));
+        }
+        //3.释放资源
+        fr.close();
+    }
+}
+
+```
+
+#### 字符输出流 Writer
+
+<details>
+<summary style="cursor:pointer; font-weight:bold; color:var(--primary);">初识字符输出流</summary>
+
+java.io.Writer 抽象类是表示用于写出字符流的所有类的超类，将指定的字符信息写出到目的地。它定义了字节输出流的基本共性功能方法。
+
+void write(int c) 写入单个字符。
+void write(char[] cbuf) 写入字符数组。
+abstract void write(char[] cbuf, int off, int len) 写入字符数组的某一部分,off数组的开始索引,len写的字符个数。
+void write(String str) 写入字符串。
+void write(String str, int off, int len) 写入字符串的某一部分,off字符串的开始索引,len写的字符个数。
+void flush() 刷新该流的缓冲。
+void close() 关闭此流，但要先刷新它。
+
+</details>
+
+##### 基本写出数据
+
+```
+public class FWWrite {
+    public static void main(String[] args) throws IOException {
+        // 使用文件名称创建流对象
+        FileWriter fw = new FileWriter("fw.txt");     
+      	// 写出数据
+      	fw.write(97); // 写出第1个字符
+      	fw.write('b'); // 写出第2个字符
+      	fw.write('C'); // 写出第3个字符
+      	fw.write(30000); // 写出第4个字符，中文编码表中30000对应一个汉字。
+      
+      	/*
+        【注意】关闭资源时,与FileOutputStream不同。
+      	 如果不关闭,数据只是保存到缓冲区，并未保存到文件。
+        */
+        // fw.close();
+    }
+}
+输出结果：
+abC田
+//虽然参数为int类型四个字节，但是只会保留一个字符的信息写出。
+//未调用close方法，数据只是保存到了缓冲区，并未写出到文件中。
+```
+
+##### 关闭和刷新
+
+因为内置缓冲区的原因，如果不关闭输出流，无法写出字符到文件中。但是关闭的流对象，是无法继续写出数据的。如果既想写出数据，又想继续使用流，就需要flush 方法了。
+
+flush ：刷新缓冲区，流对象可以继续使用。
+close ：先刷新缓冲区，然后通知系统释放资源，流对象不可以再被使用了。
+
+```
+public class FWWrite {
+    public static void main(String[] args) throws IOException {
+        // 使用文件名称创建流对象
+        FileWriter fw = new FileWriter("fw.txt");
+        // 写出数据，通过flush
+        fw.write('刷'); // 写出第1个字符
+        fw.flush();
+        fw.write('新'); // 继续写出第2个字符，写出成功
+        fw.flush();
+      
+      	// 写出数据，通过close
+        fw.write('关'); // 写出第1个字符
+        fw.close();
+        fw.write('闭'); // 继续写出第2个字符,【报错】java.io.IOException: Stream closed
+        fw.close();
+    }
+}
+
+```
+
+**写出字符数组** ：
+
+```
+public class FileWriterDemo01 {
+    public static void main(String[] args) throws IOException {
+        // 创建流对象并开启续写
+        FileWriter fw = new FileWriter("my-io\\a.txt",true);
+
+        //fw.write(25105);
+        //fw.write("你好威啊???");
+        char[] chars = {'a','b','c','我'};
+        fw.write(chars);
+
+        fw.close();
+    }
+}
+
+```
+
+##### **写出字符串**
+
+```
+public class FileWriterDemo03 {
+    public static void main(String[] args) throws IOException {
+
+        // 创建流对象，未开启续写
+        FileWriter fw = new FileWriter("my-io\\a.txt");
+
+        fw.write("我的同学各个都很厉害");
+        fw.write("说话声音很好听");
+
+        fw.flush();
+
+        fw.write("都是人才");
+        fw.write("超爱这里哟");
+
+        fw.close();
+    }
+}
+
+```
+
+### IO流异常处理
+
+#### JDK7后
+
+```
+public class TryDemo {
+    public static void main(String[] args) throws IOException {
+       	// 创建流对象
+        final  FileReader fr  = new FileReader("in.txt");
+        FileWriter fw = new FileWriter("out.txt");
+       	// 引入到try中
+        try (fr; fw) {
+          	// 定义变量
+            int b;
+          	// 读取数据
+          	while ((b = fr.read())!=-1) {
+            	// 写出数据
+            	fw.write(b);
+          	}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
