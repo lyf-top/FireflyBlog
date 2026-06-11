@@ -1,7 +1,7 @@
 ---
 title: java学习笔记下
 description: 🥧java学习之路开启
-image:'https://img.f3f3.top/img/2026/05/30/1a72c9584efc33df05646f80d12384e5.webp'
+image: 'https://img.f3f3.top/img/2026/05/30/1a72c9584efc33df05646f80d12384e5.webp'
 #文章封面页
 tags:
   - java基础
