@@ -27,6 +27,9 @@ export type {
 } from "../types/config";
 export { adConfig1, adConfig2 } from "./adConfig"; // 广告配置
 export { announcementConfig } from "./announcementConfig"; // 公告配置
+export { externalMomentsConfig } from "./externalMomentsConfig"; // 说说 Gist 配置
+export { externalNotebooksConfig } from "./externalNotebooksConfig"; // 笔记本 Gist 配置
+export type { NotebookTemplate } from "./externalNotebooksConfig"; // 笔记本模板类型
 // 样式配置
 export { backgroundWallpaper } from "./backgroundWallpaper"; // 背景壁纸配置
 // 功能配置

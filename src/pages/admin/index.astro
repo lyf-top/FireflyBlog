@@ -1,0 +1,583 @@
+---
+import { siteConfig } from "@/config";
+import { externalMomentsConfig, externalNotebooksConfig } from "@/config";
+
+if (!siteConfig.pages.admin) {
+  return Astro.redirect("/404/");
+}
+---
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>后台管理 - {siteConfig.title}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* 左侧装饰区 */
+    .admin-left {
+      flex: 1;
+      background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 50%, #5b21b6 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+      min-height: 100vh;
+    }
+
+    .admin-left-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 600;
+      z-index: 1;
+    }
+
+    .admin-left-header .icon {
+      font-size: 1.5rem;
+    }
+
+    /* 卡通角色 */
+    .admin-characters {
+      position: relative;
+      width: 100%;
+      height: 400px;
+      z-index: 1;
+    }
+
+    .character {
+      position: absolute;
+      border-radius: 20px;
+    }
+
+    .char-purple {
+      width: 120px;
+      height: 200px;
+      background: #8b5cf6;
+      left: 15%;
+      bottom: 80px;
+      border-radius: 60px 60px 20px 20px;
+    }
+
+    .char-purple .eyes {
+      position: absolute;
+      top: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 20px;
+    }
+
+    .char-purple .eye {
+      width: 16px;
+      height: 16px;
+      background: white;
+      border-radius: 50%;
+      position: relative;
+    }
+
+    .char-purple .eye::after {
+      content: "";
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: #1a1a2e;
+      border-radius: 50%;
+      top: 4px;
+      left: 4px;
+    }
+
+    .char-black {
+      width: 80px;
+      height: 280px;
+      background: #1a1a2e;
+      left: 35%;
+      bottom: 50px;
+      border-radius: 40px 40px 10px 10px;
+    }
+
+    .char-black .eyes {
+      position: absolute;
+      top: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 16px;
+    }
+
+    .char-black .eye {
+      width: 14px;
+      height: 14px;
+      background: white;
+      border-radius: 50%;
+      position: relative;
+    }
+
+    .char-black .eye::after {
+      content: "";
+      position: absolute;
+      width: 7px;
+      height: 7px;
+      background: #1a1a2e;
+      border-radius: 50%;
+      top: 3.5px;
+      left: 3.5px;
+    }
+
+    .char-orange {
+      width: 160px;
+      height: 180px;
+      background: #f97316;
+      left: 5%;
+      bottom: 0;
+      border-radius: 80px 80px 20px 20px;
+    }
+
+    .char-orange .eyes {
+      position: absolute;
+      top: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 24px;
+    }
+
+    .char-orange .eye {
+      width: 12px;
+      height: 12px;
+      background: #1a1a2e;
+      border-radius: 50%;
+    }
+
+    .char-yellow {
+      width: 130px;
+      height: 220px;
+      background: #eab308;
+      right: 15%;
+      bottom: 30px;
+      border-radius: 65px 65px 20px 20px;
+    }
+
+    .char-yellow .eyes {
+      position: absolute;
+      top: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 20px;
+    }
+
+    .char-yellow .eye {
+      width: 12px;
+      height: 12px;
+      background: #1a1a2e;
+      border-radius: 50%;
+    }
+
+    .char-yellow .mouth {
+      position: absolute;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30px;
+      height: 3px;
+      background: #1a1a2e;
+      border-radius: 2px;
+    }
+
+    /* 右侧登录区 */
+    .admin-right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      background: #fafafa;
+      min-height: 100vh;
+    }
+
+    .admin-right.dark {
+      background: #1a1a2e;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .login-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 8px;
+    }
+
+    .admin-right.dark .login-title {
+      color: #f0f0f0;
+    }
+
+    .login-subtitle {
+      font-size: 0.95rem;
+      color: #888;
+      margin-bottom: 40px;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #555;
+    }
+
+    .admin-right.dark .form-label {
+      color: #ccc;
+    }
+
+    .form-input {
+      padding: 14px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      font-size: 1rem;
+      background: white;
+      color: #1a1a2e;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    .admin-right.dark .form-input {
+      background: #2a2a3e;
+      border-color: #3a3a4e;
+      color: #f0f0f0;
+    }
+
+    .form-input:focus {
+      border-color: #7c3aed;
+    }
+
+    .login-btn {
+      padding: 14px 24px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-top: 8px;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(124, 58, 237, 0.4);
+    }
+
+    .login-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .login-error {
+      color: #e74c3c;
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 32px;
+      color: #888;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover {
+      color: #7c3aed;
+    }
+
+    /* 管理面板 */
+    .admin-panel {
+      display: none;
+    }
+
+    .admin-panel-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .admin-panel-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 8px;
+    }
+
+    .admin-panel-subtitle {
+      color: #888;
+      font-size: 0.9rem;
+    }
+
+    .admin-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .admin-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px 24px;
+      border-radius: 12px;
+      background: white;
+      border: 1px solid #e0e0e0;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .admin-right.dark .admin-nav-item {
+      background: #2a2a3e;
+      border-color: #3a3a4e;
+    }
+
+    .admin-nav-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .admin-nav-icon {
+      font-size: 1.5rem;
+    }
+
+    .admin-nav-text {
+      font-weight: 500;
+      font-size: 1rem;
+    }
+
+    .admin-nav-arrow {
+      margin-left: auto;
+      color: #ccc;
+      font-size: 1.2rem;
+    }
+
+    .no-modules {
+      text-align: center;
+      color: #888;
+      padding: 32px 0;
+      font-size: 0.9rem;
+    }
+
+    /* 响应式 */
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+
+      .admin-left {
+        min-height: 200px;
+        padding: 24px;
+      }
+
+      .admin-characters {
+        display: none;
+      }
+
+      .admin-right {
+        min-height: auto;
+        padding: 32px 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 左侧装饰区 -->
+  <div class="admin-left">
+    <div class="admin-left-header">
+      <span class="icon">🎉</span>
+      <span>后台管理</span>
+    </div>
+    <div class="admin-characters">
+      <div class="character char-purple">
+        <div class="eyes">
+          <div class="eye"></div>
+          <div class="eye"></div>
+        </div>
+      </div>
+      <div class="character char-black">
+        <div class="eyes">
+          <div class="eye"></div>
+          <div class="eye"></div>
+        </div>
+      </div>
+      <div class="character char-orange">
+        <div class="eyes">
+          <div class="eye"></div>
+          <div class="eye"></div>
+        </div>
+      </div>
+      <div class="character char-yellow">
+        <div class="eyes">
+          <div class="eye"></div>
+          <div class="eye"></div>
+        </div>
+        <div class="mouth"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右侧登录区 -->
+  <div class="admin-right" id="admin-right">
+    <div class="login-container">
+      <!-- 登录表单 -->
+      <div id="admin-login">
+        <h1 class="login-title">Welcome back!</h1>
+        <p class="login-subtitle">输入密码以进入后台</p>
+
+        <div class="login-form">
+          <div class="form-group">
+            <label class="form-label">密码</label>
+            <input
+              type="password"
+              id="admin-password"
+              class="form-input"
+              placeholder="••••••••"
+            />
+          </div>
+          <button id="admin-login-btn" class="login-btn">进入后台</button>
+        </div>
+
+        <div id="admin-login-error" class="login-error" style="display:none;"></div>
+
+        <a href="/" class="back-link">← 返回首页</a>
+      </div>
+
+      <!-- 管理面板 -->
+      <div id="admin-panel" class="admin-panel">
+        <div class="admin-panel-header">
+          <h2 class="admin-panel-title">🎉 后台管理</h2>
+          <p class="admin-panel-subtitle">选择要管理的内容</p>
+        </div>
+        <div class="admin-nav">
+          {externalMomentsConfig.enable && (
+            <button onclick="window.location.href='/admin/moments/'" class="admin-nav-item" style="width:100%;text-align:left;cursor:pointer;">
+              <span class="admin-nav-icon">💬</span>
+              <span class="admin-nav-text">管理说说</span>
+              <span class="admin-nav-arrow">›</span>
+            </button>
+          )}
+          {externalNotebooksConfig.enable && (
+            <button onclick="window.location.href='/admin/notebooks/'" class="admin-nav-item" style="width:100%;text-align:left;cursor:pointer;">
+              <span class="admin-nav-icon">📓</span>
+              <span class="admin-nav-text">管理笔记</span>
+              <span class="admin-nav-arrow">›</span>
+            </button>
+          )}
+          {!externalMomentsConfig.enable && !externalNotebooksConfig.enable && (
+            <p class="no-modules">说说和笔记功能均未启用，请先配置 Gist</p>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script is:inline define:vars={{
+    passwordHash: externalMomentsConfig.adminPasswordHash || externalNotebooksConfig.adminPasswordHash || "",
+    githubToken: externalMomentsConfig.githubToken || ""
+  }}>
+    (function() {
+      var savedToken = localStorage.getItem("admin_token");
+      if (savedToken && savedToken !== "pending") {
+        showPanel();
+        return;
+      }
+
+      // 检测深色模式
+      if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        document.getElementById("admin-right").classList.add("dark");
+      }
+
+      document.getElementById("admin-login-btn").addEventListener("click", function() {
+        var password = document.getElementById("admin-password").value;
+        var errorEl = document.getElementById("admin-login-error");
+
+        if (!password) {
+          errorEl.textContent = "请输入管理密码";
+          errorEl.style.display = "block";
+          return;
+        }
+
+        // 验证密码
+        if (passwordHash) {
+          var msgBuffer = new TextEncoder().encode(password);
+          crypto.subtle.digest("SHA-256", msgBuffer).then(function(hashBuffer) {
+            var hashArray = Array.from(new Uint8Array(hashBuffer));
+            var hashHex = hashArray.map(function(b) { return b.toString(16).padStart(2, "0"); }).join("");
+
+            if (hashHex !== passwordHash) {
+              errorEl.textContent = "密码错误";
+              errorEl.style.display = "block";
+              return;
+            }
+
+            // 密码正确，存储 Token
+            if (githubToken) {
+              localStorage.setItem("admin_token", githubToken);
+            } else {
+              localStorage.setItem("admin_token", "pending");
+            }
+            showPanel();
+          });
+        } else {
+          // 没设密码哈希，直接通过
+          if (githubToken) {
+            localStorage.setItem("admin_token", githubToken);
+          } else {
+            localStorage.setItem("admin_token", "pending");
+          }
+          showPanel();
+        }
+      });
+
+      // 回车登录
+      document.getElementById("admin-password").addEventListener("keydown", function(e) {
+        if (e.key === "Enter") document.getElementById("admin-login-btn").click();
+      });
+
+      function showPanel() {
+        document.getElementById("admin-login").style.display = "none";
+        document.getElementById("admin-panel").style.display = "block";
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -313,6 +313,10 @@ export const zh_CN: Translation = {
 	[Key.talks]: "说说",
 	[Key.talksDescription]: "我的日常动态和碎碎念",
 
+	// 笔记本页面
+	[Key.notebooks]: "笔记本",
+	[Key.notebooksDescription]: "记录生活点滴与思考",
+
 	// 密码保护
 	[Key.passwordProtected]: "密码保护",
 	[Key.passwordProtectedDesc]: "此内容已被密码保护，请输入密码查看。",

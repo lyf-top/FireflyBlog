@@ -1,0 +1,387 @@
+---
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+import { siteConfig, externalNotebooksConfig } from "@/config";
+
+if (!siteConfig.pages.admin) {
+  return Astro.redirect("/404/");
+}
+
+const notebookNames = Object.keys(externalNotebooksConfig.notebookGists);
+const templates = externalNotebooksConfig.templates;
+---
+
+<MainGridLayout title="管理笔记" description="笔记本内容管理">
+  <div class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32">
+    <div class="card-base z-10 px-9 py-6 relative w-full">
+      <div class="admin-moments-header">
+        <a href="/admin/" class="btn-regular inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm">
+          <span>←</span>
+          <span>返回</span>
+        </a>
+        <h1 class="text-xl font-bold">📓 管理笔记</h1>
+      </div>
+
+      <!-- 笔记本选择 -->
+      <div id="notebooks-admin-select" class="admin-notebook-select">
+        <h3 class="text-lg font-bold mb-3">选择笔记本</h3>
+        <div id="notebooks-admin-grid" class="admin-notebook-grid">
+          {notebookNames.map(name => (
+            <button class="admin-notebook-btn" data-notebook={name}>
+              <span>📓</span>
+              <span>{name}</span>
+              <span class="admin-notebook-status">✅ 已配置</span>
+            </button>
+          ))}
+          {notebookNames.length === 0 && (
+            <p class="text-50 text-sm">未配置笔记本，请先在 externalNotebooksConfig 中添加</p>
+          )}
+        </div>
+      </div>
+
+      <!-- 笔记条目列表 -->
+      <div id="notebook-entries-admin" style="display:none;">
+        <div class="admin-moments-header">
+          <button id="entries-back-btn" class="btn-regular inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm">
+            <span>←</span>
+            <span>返回笔记本列表</span>
+          </button>
+          <h2 id="entries-notebook-name" class="text-lg font-bold"></h2>
+          <button id="entries-new-btn" class="btn-regular px-4 py-2 rounded-lg text-sm">
+            + 新建笔记
+          </button>
+        </div>
+        <div id="notebook-entries-admin-list"></div>
+      </div>
+
+      <!-- 编辑器弹窗 -->
+      <div id="notebook-editor-overlay" class="admin-overlay" style="display:none;">
+        <div class="admin-editor-modal admin-editor-modal-lg">
+          <div class="admin-editor-header">
+            <h2 id="notebook-editor-title">新建笔记</h2>
+            <button id="notebook-editor-close" class="admin-close-btn">&times;</button>
+          </div>
+          <div class="admin-editor-body">
+            <div class="admin-form-group">
+              <label class="admin-label">标题</label>
+              <input type="text" id="nb-title" class="admin-input" placeholder="笔记标题" />
+            </div>
+            <div class="admin-form-group">
+              <label class="admin-label">日期</label>
+              <input type="date" id="nb-date" class="admin-input" />
+            </div>
+            <!-- 模板选择 -->
+            <div class="admin-form-group">
+              <label class="admin-label">快速模板</label>
+              <div class="admin-template-list">
+                {templates.map(t => (
+                  <button class="admin-template-btn" data-template-id={t.id} data-content={t.content} data-title-template={t.title}>
+                    <span>{t.icon}</span>
+                    <span>{t.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div class="admin-form-group">
+              <label class="admin-label">内容（Markdown）</label>
+              <div class="admin-md-editor">
+                <div class="admin-md-toolbar">
+                  <button class="admin-md-btn" data-action="bold" title="粗体"><b>B</b></button>
+                  <button class="admin-md-btn" data-action="italic" title="斜体"><i>I</i></button>
+                  <button class="admin-md-btn" data-action="heading" title="标题">H</button>
+                  <button class="admin-md-btn" data-action="list" title="列表">☰</button>
+                  <button class="admin-md-btn" data-action="code" title="代码">&lt;/&gt;</button>
+                  <button class="admin-md-btn" data-action="link" title="链接">🔗</button>
+                </div>
+                <textarea id="nb-content" class="admin-textarea admin-md-textarea" rows="15" placeholder="笔记内容（Markdown 格式）..."></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="admin-editor-footer">
+            <button id="nb-delete-btn" class="btn-card px-4 py-2 rounded-lg text-sm" style="display:none; color: #e74c3c;">
+              删除
+            </button>
+            <div class="admin-editor-footer-right">
+              <button id="nb-cancel-btn" class="btn-card px-4 py-2 rounded-lg text-sm">取消</button>
+              <button id="nb-save-btn" class="btn-regular px-4 py-2 rounded-lg text-sm">保存</button>
+            </div>
+          </div>
+          <div id="notebook-editor-status" class="admin-editor-status"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</MainGridLayout>
+
+<script is:inline define:vars={{
+  notebookGists: JSON.stringify(externalNotebooksConfig.notebookGists),
+  templates: JSON.stringify(externalNotebooksConfig.templates),
+  githubToken: externalNotebooksConfig.githubToken || ""
+}}>
+  function initNotebooksAdmin() {
+    var token = localStorage.getItem("admin_token");
+    if (!token || token === "pending") token = githubToken;
+    if (!token) {
+      window.location.href = "/admin/";
+      return;
+    }
+
+    var gists = JSON.parse(notebookGists);
+    var tplList = JSON.parse(templates);
+    var headers = {
+      "Authorization": "Bearer " + token,
+      "Content-Type": "application/json"
+    };
+
+    let currentNotebook = null;
+    let currentEntries = [];
+    let editingEntryId = null;
+
+    const selectView = document.getElementById("notebooks-admin-select");
+    const entriesView = document.getElementById("notebook-entries-admin");
+    const entriesList = document.getElementById("notebook-entries-admin-list");
+    const overlay = document.getElementById("notebook-editor-overlay");
+
+    // 选择笔记本
+    document.querySelectorAll(".admin-notebook-btn").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        currentNotebook = btn.dataset.notebook;
+        selectView.style.display = "none";
+        entriesView.style.display = "block";
+        document.getElementById("entries-notebook-name").textContent = currentNotebook;
+        await loadEntries();
+      });
+    });
+
+    // 返回笔记本列表
+    document.getElementById("entries-back-btn").addEventListener("click", () => {
+      selectView.style.display = "block";
+      entriesView.style.display = "none";
+      currentNotebook = null;
+    });
+
+    // 加载条目
+    async function loadEntries() {
+      const gistId = gists[currentNotebook];
+      if (!gistId) {
+        entriesList.innerHTML = '<div class="admin-error">笔记本未配置 Gist ID</div>';
+        return;
+      }
+
+      entriesList.innerHTML = '<div class="notebooks-loading"><div class="notebooks-spinner"></div><span>加载中...</span></div>';
+
+      try {
+        const res = await fetch(`https://api.github.com/gists/${gistId}`, { headers });
+        if (!res.ok) throw new Error("Failed");
+        const gist = await res.json();
+        const content = gist.files["notebooks-entries.json"]?.content || '{"entries":[]}';
+        const data = JSON.parse(content);
+        currentEntries = data.entries || [];
+        renderEntries();
+      } catch (e) {
+        entriesList.innerHTML = '<div class="admin-error">加载失败</div>';
+      }
+    }
+
+    // 渲染条目列表
+    function renderEntries() {
+      if (currentEntries.length === 0) {
+        entriesList.innerHTML = '<div class="admin-empty">暂无笔记</div>';
+        return;
+      }
+
+      const sorted = [...currentEntries].sort((a, b) => new Date(b.date) - new Date(a.date));
+      entriesList.innerHTML = sorted.map(e => {
+        const date = e.date || "";
+        return `
+          <div class="admin-moment-item">
+            <div class="admin-moment-info">
+              <div class="admin-moment-date">${date}</div>
+              <div class="admin-moment-preview">${e.title || "无标题"}</div>
+            </div>
+            <button class="btn-card px-3 py-1 rounded-lg text-sm admin-nb-edit-btn" data-id="${e.id}">编辑</button>
+          </div>
+        `;
+      }).join("");
+
+      entriesList.querySelectorAll(".admin-nb-edit-btn").forEach(btn => {
+        btn.addEventListener("click", () => editEntry(btn.dataset.id));
+      });
+    }
+
+    // 打开编辑器
+    function openEditor(title) {
+      document.getElementById("notebook-editor-title").textContent = title;
+      overlay.style.display = "flex";
+      document.getElementById("notebook-editor-status").textContent = "";
+    }
+
+    // 关闭编辑器
+    function closeEditor() {
+      overlay.style.display = "none";
+      editingEntryId = null;
+    }
+
+    // 新建笔记
+    document.getElementById("entries-new-btn").addEventListener("click", () => {
+      editingEntryId = null;
+      document.getElementById("nb-title").value = "";
+      document.getElementById("nb-date").value = new Date().toISOString().slice(0, 10);
+      document.getElementById("nb-content").value = "";
+      document.getElementById("nb-delete-btn").style.display = "none";
+      openEditor("新建笔记");
+    });
+
+    // 编辑笔记
+    function editEntry(id) {
+      const entry = currentEntries.find(e => e.id === id);
+      if (!entry) return;
+
+      editingEntryId = id;
+      document.getElementById("nb-title").value = entry.title || "";
+      document.getElementById("nb-date").value = entry.date || "";
+      document.getElementById("nb-content").value = entry.content || "";
+      document.getElementById("nb-delete-btn").style.display = "inline-block";
+      openEditor("编辑笔记");
+    }
+
+    // 模板按钮
+    document.querySelectorAll(".admin-template-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const content = btn.dataset.content || "";
+        const titleTemplate = btn.dataset.titleTemplate || "";
+        const date = document.getElementById("nb-date").value;
+        document.getElementById("nb-content").value = content;
+        if (titleTemplate && !document.getElementById("nb-title").value) {
+          document.getElementById("nb-title").value = titleTemplate.replace("{name}", date);
+        }
+      });
+    });
+
+    // Markdown 工具栏
+    document.querySelectorAll(".admin-md-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const textarea = document.getElementById("nb-content");
+        const action = btn.dataset.action;
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const selected = textarea.value.substring(start, end);
+
+        const insertions = {
+          bold: `**${selected || "粗体文字"}**`,
+          italic: `*${selected || "斜体文字"}*`,
+          heading: `## ${selected || "标题"}`,
+          list: `- ${selected || "列表项"}`,
+          code: `\`${selected || "代码"}\``,
+          link: `[${selected || "链接文字"}](https://)`
+        };
+
+        textarea.value = textarea.value.substring(0, start) + insertions[action] + textarea.value.substring(end);
+        textarea.focus();
+      });
+    });
+
+    document.getElementById("notebook-editor-close").addEventListener("click", closeEditor);
+    document.getElementById("nb-cancel-btn").addEventListener("click", closeEditor);
+
+    // 保存
+    document.getElementById("nb-save-btn").addEventListener("click", async () => {
+      var title = document.getElementById("nb-title").value.trim();
+      var date = document.getElementById("nb-date").value;
+      var content = document.getElementById("nb-content").value;
+
+      if (!title) {
+        document.getElementById("notebook-editor-status").textContent = "标题不能为空";
+        return;
+      }
+
+      var saveBtn = document.getElementById("nb-save-btn");
+      var statusEl = document.getElementById("notebook-editor-status");
+      var origText = saveBtn.textContent;
+      saveBtn.disabled = true;
+      saveBtn.textContent = "⏳ 保存中...";
+      statusEl.textContent = "正在连接 GitHub...";
+
+      var now = new Date().toISOString();
+
+      if (editingEntryId) {
+        var idx = currentEntries.findIndex(function(e) { return e.id === editingEntryId; });
+        if (idx >= 0) {
+          currentEntries[idx] = Object.assign({}, currentEntries[idx], { title: title, date: date, content: content, updatedAt: now });
+        }
+      } else {
+        currentEntries.push({
+          id: "entry-" + Date.now(),
+          notebook: currentNotebook,
+          title: title,
+          date: date,
+          content: content,
+          createdAt: now,
+          updatedAt: now
+        });
+      }
+
+      try {
+        var gistId = gists[currentNotebook];
+        var fileContent = JSON.stringify({ entries: currentEntries, metadata: { name: currentNotebook } }, null, 2);
+
+        // 设置 30 秒超时
+        var controller = new AbortController();
+        var timeoutId = setTimeout(function() { controller.abort(); }, 30000);
+
+        statusEl.textContent = "正在保存到 GitHub...";
+        var res = await fetch("https://api.github.com/gists/" + gistId, {
+          method: "PATCH",
+          headers: headers,
+          body: JSON.stringify({ files: { "notebooks-entries.json": { content: fileContent } } }),
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        statusEl.textContent = "✅ 保存成功";
+        setTimeout(function() { closeEditor(); renderEntries(); }, 500);
+      } catch (e) {
+        if (e.name === "AbortError") {
+          statusEl.textContent = "❌ 保存超时，请检查网络后重试";
+        } else {
+          statusEl.textContent = "❌ 保存失败: " + e.message;
+        }
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = origText;
+      }
+    });
+
+    // 删除
+    document.getElementById("nb-delete-btn").addEventListener("click", async () => {
+      if (!editingEntryId || !confirm("确定要删除这篇笔记吗？")) return;
+
+      const deleteBtn = document.getElementById("nb-delete-btn");
+      const statusEl = document.getElementById("notebook-editor-status");
+      deleteBtn.disabled = true;
+      statusEl.textContent = "删除中...";
+
+      currentEntries = currentEntries.filter(e => e.id !== editingEntryId);
+
+      try {
+        const gistId = gists[currentNotebook];
+        const fileContent = JSON.stringify({ entries: currentEntries, metadata: { name: currentNotebook } }, null, 2);
+        await fetch(`https://api.github.com/gists/${gistId}`, {
+          method: "PATCH",
+          headers,
+          body: JSON.stringify({ files: { "notebooks-entries.json": { content: fileContent } } })
+        });
+        statusEl.textContent = "删除成功";
+        setTimeout(() => { closeEditor(); renderEntries(); }, 500);
+      } catch (e) {
+        statusEl.textContent = "删除失败: " + e.message;
+      } finally {
+        deleteBtn.disabled = false;
+      }
+    });
+  }
+
+  initNotebooksAdmin();
+  document.addEventListener("astro:page-load", initNotebooksAdmin);
+  document.addEventListener("swup:contentReplaced", initNotebooksAdmin);
+</script>

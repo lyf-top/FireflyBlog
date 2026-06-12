@@ -87,7 +87,9 @@ export type SiteConfig = {
 		guestbook: boolean; // 留言板页面开关
 		bangumi: boolean;
 		gallery: boolean; // 相册页面开关
-	  talk: boolean;   //新增导航说说开关
+		talk: boolean; // 说说页面开关
+		notebooks?: boolean; // 笔记本页面开关
+		admin?: boolean; // 管理后台页面开关
 		apps?: boolean; // 应用中心页面开关
 	};
 
@@ -204,6 +206,7 @@ export enum LinkPreset {
 	MoviesGames = 11,
 	MusicPage = 12,
 	Changelog = 13,
+	Notebooks = 14,
 }
 
 export type NavBarLink = {

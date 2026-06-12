@@ -307,6 +307,10 @@ enum I18nKey {
 	talks = "talks",
 	talksDescription = "talksDescription",
 
+	// 笔记本页面
+	notebooks = "notebooks",
+	notebooksDescription = "notebooksDescription",
+
 	// 密码保护
 	passwordProtected = "passwordProtected",
 	passwordProtectedDesc = "passwordProtectedDesc",

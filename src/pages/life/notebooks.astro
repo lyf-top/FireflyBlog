@@ -1,0 +1,327 @@
+---
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+import I18nKey from "@/i18n/i18nKey";
+import { i18n } from "@/i18n/translation";
+import { externalNotebooksConfig, siteConfig } from "@/config";
+
+if (!siteConfig.pages.notebooks) {
+  return Astro.redirect("/404/");
+}
+
+const enabled = externalNotebooksConfig.enable;
+const notebookNames = Object.keys(externalNotebooksConfig.notebookGists);
+---
+
+<MainGridLayout
+  title={i18n(I18nKey.notebooks)}
+  description={i18n(I18nKey.notebooksDescription)}
+>
+  <div class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32">
+    <div class="card-base z-10 px-9 py-6 relative w-full">
+      {enabled ? (
+        <div id="notebooks-container" class="notebooks-container">
+          <!-- 笔记本列表视图 -->
+          <div id="notebooks-list-view" class="notebooks-view">
+            <div id="notebooks-loading" class="notebooks-loading">
+              <div class="notebooks-spinner"></div>
+              <span>加载中...</span>
+            </div>
+            <div id="notebooks-grid" class="notebooks-grid"></div>
+            <div id="notebooks-empty" class="notebooks-empty" style="display:none;">
+              <p>暂无笔记本</p>
+            </div>
+            <div id="notebooks-error" class="notebooks-error" style="display:none;">
+              <p>加载失败，请稍后再试</p>
+            </div>
+          </div>
+
+          <!-- 单个笔记本条目列表视图 -->
+          <div id="notebook-detail-view" class="notebooks-view" style="display:none;">
+            <div class="notebook-detail-header">
+              <button id="notebook-back-btn" class="btn-regular inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm mb-4">
+                <span>←</span>
+                <span>返回笔记本列表</span>
+              </button>
+              <h2 id="notebook-detail-title" class="text-xl font-bold mb-4"></h2>
+            </div>
+            <div id="notebook-entries-list" class="notebook-entries-list"></div>
+          </div>
+
+          <!-- 单个条目详情视图 -->
+          <div id="entry-detail-view" class="notebooks-view" style="display:none;">
+            <div class="entry-detail-header">
+              <button id="entry-back-btn" class="btn-regular inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm mb-4">
+                <span>←</span>
+                <span>返回条目列表</span>
+              </button>
+              <h2 id="entry-detail-title" class="text-xl font-bold mb-2"></h2>
+              <div id="entry-detail-date" class="text-sm text-50 mb-4"></div>
+            </div>
+            <div id="entry-detail-content" class="prose"></div>
+          </div>
+        </div>
+      ) : (
+        <div class="text-center py-12">
+          <p class="text-50 text-sm">笔记本功能未启用</p>
+        </div>
+      )}
+    </div>
+  </div>
+
+  {enabled && (
+    <div class="mt-4 text-center">
+      <a href="/admin/notebooks/" class="btn-regular inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm">
+        <span>✏️</span>
+        <span>管理笔记</span>
+      </a>
+    </div>
+  )}
+</MainGridLayout>
+
+{enabled && (
+  <script is:inline define:vars={{
+    notebookGists: JSON.stringify(externalNotebooksConfig.notebookGists),
+    notebookMeta: JSON.stringify(externalNotebooksConfig.notebookMeta)
+  }}>
+    function initNotebooks() {
+      const container = document.getElementById("notebooks-container");
+      if (!container) return;
+
+      const gists = JSON.parse(notebookGists);
+      const meta = JSON.parse(notebookMeta);
+      const listView = document.getElementById("notebooks-list-view");
+      const detailView = document.getElementById("notebook-detail-view");
+      const entryView = document.getElementById("entry-detail-view");
+      const grid = document.getElementById("notebooks-grid");
+      const loading = document.getElementById("notebooks-loading");
+      const empty = document.getElementById("notebooks-empty");
+      const error = document.getElementById("notebooks-error");
+
+      // 解析 URL 参数
+      const params = new URLSearchParams(window.location.search);
+      const nbParam = params.get("nb");
+      const entryId = params.get("id");
+
+      // 简易 Markdown 转 HTML
+      function mdToHtml(md) {
+        if (!md) return "";
+        return md
+          .replace(/^### (.+)$/gm, "<h3>$1</h3>")
+          .replace(/^## (.+)$/gm, "<h2>$1</h2>")
+          .replace(/^# (.+)$/gm, "<h1>$1</h1>")
+          .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+          .replace(/\*(.+?)\*/g, "<em>$1</em>")
+          .replace(/`(.+?)`/g, "<code>$1</code>")
+          .replace(/^- (.+)$/gm, "<li>$1</li>")
+          .replace(/(<li>.*<\/li>)/gs, "<ul>$1</ul>")
+          .replace(/\n{2,}/g, "</p><p>")
+          .replace(/\n/g, "<br>");
+      }
+
+      // 通过 GitHub API 获取 Gist 数据
+      async function fetchGist(gistId) {
+        const token = localStorage.getItem("admin_token");
+        const apiUrl = "https://api.github.com/gists/" + gistId;
+        const headers = {};
+        if (token && token !== "pending") {
+          headers["Authorization"] = "Bearer " + token;
+        }
+        const res = await fetch(apiUrl, { headers });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const gist = await res.json();
+        const file = gist.files["notebooks-entries.json"];
+        if (!file) throw new Error("File not found");
+        return JSON.parse(file.content);
+      }
+
+      // 加载所有笔记本数据
+      async function loadAllNotebooks() {
+        const allEntries = [];
+        const metadata = {};
+
+        for (const [name, gistId] of Object.entries(gists)) {
+          try {
+            const data = await fetchGist(gistId);
+            if (data.entries) allEntries.push(...data.entries);
+            if (data.metadata) metadata[name] = data.metadata;
+          } catch (e) {
+            console.warn(`Failed to load notebook "${name}":`, e);
+          }
+        }
+
+        return { allEntries, metadata };
+      }
+
+      // 显示笔记本列表
+      async function showNotebookList() {
+        listView.style.display = "block";
+        detailView.style.display = "none";
+        entryView.style.display = "none";
+        loading.style.display = "flex";
+
+        try {
+          const { allEntries, metadata } = await loadAllNotebooks();
+          loading.style.display = "none";
+
+          const notebookCounts = {};
+          allEntries.forEach(e => {
+            notebookCounts[e.notebook] = (notebookCounts[e.notebook] || 0) + 1;
+          });
+
+          const names = Object.keys(gists);
+          if (names.length === 0) {
+            empty.style.display = "block";
+            return;
+          }
+
+          grid.style.display = "grid";
+          grid.innerHTML = "";
+
+          names.forEach(name => {
+            const count = notebookCounts[name] || 0;
+            const nbMeta = meta[name] || {};
+            const coverImage = nbMeta.coverImage || "";
+            const summary = nbMeta.summary || "";
+
+            const card = document.createElement("a");
+            card.href = `?nb=${encodeURIComponent(name)}`;
+            card.className = "notebook-card";
+
+            const coverHtml = coverImage
+              ? `<div class="notebook-card-cover"><img src="${coverImage}" alt="${name}" loading="lazy" /></div>`
+              : `<div class="notebook-card-cover notebook-card-cover-placeholder">📓</div>`;
+
+            card.innerHTML = `
+              ${coverHtml}
+              <div class="notebook-card-body">
+                <div class="notebook-card-badge">笔记 ${count} 篇</div>
+                <h3 class="notebook-card-title">${name}</h3>
+                ${summary ? `<p class="notebook-card-summary">${summary}</p>` : ""}
+                <div class="notebook-card-footer">
+                  <span class="notebook-card-arrow">›</span>
+                </div>
+              </div>
+            `;
+            grid.appendChild(card);
+          });
+        } catch (e) {
+          loading.style.display = "none";
+          error.style.display = "block";
+        }
+      }
+
+      // 显示笔记本条目列表
+      async function showNotebookEntries(notebookName) {
+        listView.style.display = "none";
+        detailView.style.display = "block";
+        entryView.style.display = "none";
+
+        const titleEl = document.getElementById("notebook-detail-title");
+        const entriesList = document.getElementById("notebook-entries-list");
+        titleEl.textContent = notebookName;
+        entriesList.innerHTML = '<div class="notebooks-loading"><div class="notebooks-spinner"></div><span>加载中...</span></div>';
+
+        try {
+          const gistId = gists[notebookName];
+          if (!gistId) throw new Error("Notebook not found");
+
+          const data = await fetchGist(gistId);
+
+          const entries = (data.entries || [])
+            .filter(e => e.notebook === notebookName)
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+          entriesList.innerHTML = "";
+
+          if (entries.length === 0) {
+            entriesList.innerHTML = '<div class="notebooks-empty"><p>该笔记本暂无笔记</p></div>';
+            return;
+          }
+
+          entries.forEach(entry => {
+            const date = new Date(entry.date);
+            const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+            const card = document.createElement("a");
+            card.href = `?nb=${encodeURIComponent(notebookName)}&id=${entry.id}`;
+            card.className = "notebook-entry-card";
+            card.innerHTML = `
+              <div class="entry-card-title">${entry.title || "无标题"}</div>
+              <div class="entry-card-date">${dateStr}</div>
+              <div class="entry-card-preview">${(entry.content || "").substring(0, 100)}...</div>
+            `;
+            entriesList.appendChild(card);
+          });
+        } catch (e) {
+          entriesList.innerHTML = '<div class="notebooks-error"><p>加载失败</p></div>';
+        }
+      }
+
+      // 显示单个条目详情
+      async function showEntryDetail(notebookName, entryId) {
+        listView.style.display = "none";
+        detailView.style.display = "none";
+        entryView.style.display = "block";
+
+        const titleEl = document.getElementById("entry-detail-title");
+        const dateEl = document.getElementById("entry-detail-date");
+        const contentEl = document.getElementById("entry-detail-content");
+        contentEl.innerHTML = '<div class="notebooks-loading"><div class="notebooks-spinner"></div><span>加载中...</span></div>';
+
+        try {
+          const gistId = gists[notebookName];
+          if (!gistId) throw new Error("Notebook not found");
+
+          const data = await fetchGist(gistId);
+
+          const entry = (data.entries || []).find(e => e.id === entryId);
+          if (!entry) throw new Error("Entry not found");
+
+          const date = new Date(entry.date);
+          const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
+          titleEl.textContent = entry.title || "无标题";
+          dateEl.textContent = dateStr;
+          contentEl.innerHTML = mdToHtml(entry.content || "");
+        } catch (e) {
+          contentEl.innerHTML = '<div class="notebooks-error"><p>加载失败</p></div>';
+        }
+      }
+
+      // 返回按钮事件
+      document.getElementById("notebook-back-btn").addEventListener("click", () => {
+        window.history.pushState({}, "", "/life/notebooks/");
+        showNotebookList();
+      });
+
+      document.getElementById("entry-back-btn").addEventListener("click", () => {
+        const params = new URLSearchParams(window.location.search);
+        const nb = params.get("nb");
+        window.history.pushState({}, "", `?nb=${encodeURIComponent(nb)}`);
+        showNotebookEntries(nb);
+      });
+
+      // 浏览器前进/后退
+      window.addEventListener("popstate", () => {
+        const p = new URLSearchParams(window.location.search);
+        const nb = p.get("nb");
+        const id = p.get("id");
+        if (id && nb) showEntryDetail(nb, id);
+        else if (nb) showNotebookEntries(nb);
+        else showNotebookList();
+      });
+
+      // 初始路由
+      if (entryId && nbParam) {
+        showEntryDetail(nbParam, entryId);
+      } else if (nbParam) {
+        showNotebookEntries(nbParam);
+      } else {
+        showNotebookList();
+      }
+    }
+
+    initNotebooks();
+    document.addEventListener("astro:page-load", initNotebooks);
+    document.addEventListener("swup:contentReplaced", initNotebooks);
+  </script>
+)}

@@ -1,0 +1,135 @@
+/* 说说（Moments）页面样式 */
+
+.moments-container {
+  min-height: 200px;
+}
+
+.moments-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 0;
+  color: var(--text-50);
+}
+
+.moments-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--line-divider);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: moments-spin 0.8s linear infinite;
+}
+
+@keyframes moments-spin {
+  to { transform: rotate(360deg); }
+}
+
+.moments-list {
+  display: none;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.moments-empty,
+.moments-error {
+  text-align: center;
+  padding: 48px 0;
+  color: var(--text-50);
+}
+
+/* 单条说说卡片 */
+.moment-card {
+  padding: 20px;
+  border-radius: 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--line-divider);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.moment-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.moment-header {
+  margin-bottom: 10px;
+}
+
+.moment-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: var(--text-50);
+}
+
+.moment-date {
+  font-weight: 500;
+}
+
+.moment-location {
+  color: var(--text-50);
+}
+
+.moment-pinned {
+  background: var(--primary);
+  color: white;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.moment-content {
+  color: var(--text-90);
+  line-height: 1.8;
+  margin-bottom: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* 说说图片网格 */
+.moment-images {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.moment-images img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.moment-images img:hover {
+  transform: scale(1.05);
+}
+
+/* 说说标签 */
+.moment-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.moment-tag {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  background: var(--btn-card-bg);
+  color: var(--primary);
+  font-size: 0.8rem;
+  transition: background 0.2s;
+}
+
+.moment-tag:hover {
+  background: var(--btn-card-bg-hover);
+}

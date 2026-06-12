@@ -40,6 +40,8 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 			...(siteConfig.pages.gallery ? [LinkPreset.Gallery] : []),
 			// 留言板
 			...(siteConfig.pages.guestbook ? [LinkPreset.Guestbook] : []),
+			// 笔记本
+			...(siteConfig.pages.notebooks ? [LinkPreset.Notebooks] : []),
 		],
 	});
 
@@ -73,6 +75,12 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 				icon: "material-symbols:music-note",
 			},
 			{
+				name: "网易云音乐",
+				url: "https://music.f3f3.top",
+				icon: "material-symbols:music-note",
+				external: true,
+			},
+			{
 				name: "足迹",
 				url: "/life/places/",
 				icon: "material-symbols:location-on",
@@ -94,6 +102,15 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 			...(siteConfig.pages.sponsor ? [LinkPreset.Sponsor] : []),
 		],
 	});
+
+	// 管理后台（最右侧）
+	if (siteConfig.pages.admin) {
+		links.push({
+			name: "管理",
+			url: "/admin/",
+			icon: "material-symbols:settings",
+		});
+	}
 
 	// 仅返回链接，其它导航搜索相关配置在模块顶层常量中独立导出
 	return { links } as NavBarConfig;

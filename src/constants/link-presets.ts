@@ -73,4 +73,9 @@ export const LinkPresets: { [key in LinkPreset]: NavBarLink } = {
 		url: "/changelog/",
 		icon: "material-symbols:history",
 	},
+	[LinkPreset.Notebooks]: {
+		name: i18n(I18nKey.notebooks),
+		url: "/life/notebooks/",
+		icon: "material-symbols:note",
+	},
 };

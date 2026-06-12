@@ -320,6 +320,10 @@ export const en: Translation = {
 	[Key.talks]: "Talks",
 	[Key.talksDescription]: "My daily updates and thoughts",
 
+	// Notebooks Page
+	[Key.notebooks]: "Notebooks",
+	[Key.notebooksDescription]: "Life reflections and thoughts",
+
 	// Password Protection
 	[Key.passwordProtected]: "Password Protected",
 	[Key.passwordProtectedDesc]:

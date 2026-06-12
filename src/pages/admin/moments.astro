@@ -1,0 +1,313 @@
+---
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+import { siteConfig, externalMomentsConfig } from "@/config";
+
+if (!siteConfig.pages.admin) {
+  return Astro.redirect("/404/");
+}
+---
+
+<MainGridLayout title="管理说说" description="说说内容管理">
+  <div class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32">
+    <div class="card-base z-10 px-9 py-6 relative w-full">
+      <div class="admin-moments-header">
+        <a href="/admin/" class="btn-regular inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm">
+          <span>←</span>
+          <span>返回</span>
+        </a>
+        <h1 class="text-xl font-bold">💬 管理说说</h1>
+        <button id="moments-new-btn" class="btn-regular px-4 py-2 rounded-lg text-sm">
+          + 新建说说
+        </button>
+      </div>
+
+      <!-- 说说列表 -->
+      <div id="moments-admin-list" class="moments-admin-list">
+        <div class="notebooks-loading">
+          <div class="notebooks-spinner"></div>
+          <span>加载中...</span>
+        </div>
+      </div>
+
+      <!-- 编辑器弹窗 -->
+      <div id="moments-editor-overlay" class="admin-overlay" style="display:none;">
+        <div class="admin-editor-modal">
+          <div class="admin-editor-header">
+            <h2 id="moments-editor-title">新建说说</h2>
+            <button id="moments-editor-close" class="admin-close-btn">&times;</button>
+          </div>
+          <div class="admin-editor-body">
+            <div class="admin-form-group">
+              <label class="admin-label">内容</label>
+              <textarea id="moments-content" class="admin-textarea" rows="5" placeholder="说说内容..."></textarea>
+            </div>
+            <div class="admin-form-group">
+              <label class="admin-label">图片（每行一个 URL）</label>
+              <textarea id="moments-images" class="admin-textarea" rows="3" placeholder="https://example.com/photo1.jpg&#10;https://example.com/photo2.jpg"></textarea>
+            </div>
+            <div class="admin-form-row">
+              <div class="admin-form-group admin-form-half">
+                <label class="admin-label">标签（逗号分隔）</label>
+                <input type="text" id="moments-tags" class="admin-input" placeholder="日常, 开心" />
+              </div>
+              <div class="admin-form-group admin-form-half">
+                <label class="admin-label">位置</label>
+                <input type="text" id="moments-location" class="admin-input" placeholder="河南-郑州" />
+              </div>
+            </div>
+            <div class="admin-form-row">
+              <div class="admin-form-group admin-form-half">
+                <label class="admin-label">发布时间</label>
+                <input type="datetime-local" id="moments-date" class="admin-input" />
+              </div>
+              <div class="admin-form-group admin-form-half">
+                <label class="admin-label">置顶</label>
+                <label class="admin-toggle">
+                  <input type="checkbox" id="moments-pinned" />
+                  <span class="admin-toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="admin-editor-footer">
+            <button id="moments-delete-btn" class="btn-card px-4 py-2 rounded-lg text-sm" style="display:none; color: #e74c3c;">
+              删除
+            </button>
+            <div class="admin-editor-footer-right">
+              <button id="moments-cancel-btn" class="btn-card px-4 py-2 rounded-lg text-sm">取消</button>
+              <button id="moments-save-btn" class="btn-regular px-4 py-2 rounded-lg text-sm">保存</button>
+            </div>
+          </div>
+          <div id="moments-editor-status" class="admin-editor-status"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</MainGridLayout>
+
+<script is:inline define:vars={{
+  gistId: externalMomentsConfig.gistId,
+  fileName: externalMomentsConfig.fileName,
+  githubToken: externalMomentsConfig.githubToken || ""
+}}>
+  function initMomentsAdmin() {
+    var token = localStorage.getItem("admin_token");
+    if (!token || token === "pending") token = githubToken;
+    if (!token) {
+      window.location.href = "/admin/";
+      return;
+    }
+
+    var API_BASE = "https://api.github.com/gists/" + gistId;
+    var headers = {
+      "Authorization": "Bearer " + token,
+      "Content-Type": "application/json"
+    };
+
+    const listEl = document.getElementById("moments-admin-list");
+    const overlay = document.getElementById("moments-editor-overlay");
+    const newBtn = document.getElementById("moments-new-btn");
+    const closeBtn = document.getElementById("moments-editor-close");
+    const cancelBtn = document.getElementById("moments-cancel-btn");
+    const saveBtn = document.getElementById("moments-save-btn");
+    const deleteBtn = document.getElementById("moments-delete-btn");
+    const statusEl = document.getElementById("moments-editor-status");
+
+    let editingId = null;
+    let currentData = [];
+
+    // 加载说说列表
+    async function loadMoments() {
+      try {
+        const res = await fetch(API_BASE, { headers });
+        if (!res.ok) throw new Error("Failed to load");
+        const gist = await res.json();
+        const content = gist.files[fileName]?.content || "[]";
+        currentData = JSON.parse(content);
+        renderList();
+      } catch (e) {
+        listEl.innerHTML = '<div class="admin-error">加载失败，请检查 Token 权限</div>';
+      }
+    }
+
+    // 渲染列表
+    function renderList() {
+      if (currentData.length === 0) {
+        listEl.innerHTML = '<div class="admin-empty">暂无说说，点击右上角创建</div>';
+        return;
+      }
+
+      const sorted = [...currentData].sort((a, b) => {
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
+        return new Date(b.published) - new Date(a.published);
+      });
+
+      listEl.innerHTML = sorted.map(m => {
+        const date = new Date(m.published);
+        const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+        const preview = (m.content || "").substring(0, 80);
+        return `
+          <div class="admin-moment-item" data-id="${m.id}">
+            <div class="admin-moment-info">
+              <div class="admin-moment-date">${dateStr}${m.pinned ? ' <span class="moment-pinned">置顶</span>' : ""}</div>
+              <div class="admin-moment-preview">${preview}</div>
+              ${m.tags ? `<div class="admin-moment-tags">${m.tags.map(t => `<span class="moment-tag">${t}</span>`).join("")}</div>` : ""}
+            </div>
+            <button class="btn-card px-3 py-1 rounded-lg text-sm admin-edit-btn" data-id="${m.id}">编辑</button>
+          </div>
+        `;
+      }).join("");
+
+      listEl.querySelectorAll(".admin-edit-btn").forEach(btn => {
+        btn.addEventListener("click", () => editMoment(btn.dataset.id));
+      });
+    }
+
+    // 打开编辑器
+    function openEditor(title, data) {
+      document.getElementById("moments-editor-title").textContent = title;
+      overlay.style.display = "flex";
+      statusEl.textContent = "";
+    }
+
+    // 关闭编辑器
+    function closeEditor() {
+      overlay.style.display = "none";
+      editingId = null;
+    }
+
+    // 新建说说
+    newBtn.addEventListener("click", () => {
+      editingId = null;
+      document.getElementById("moments-content").value = "";
+      document.getElementById("moments-images").value = "";
+      document.getElementById("moments-tags").value = "";
+      document.getElementById("moments-location").value = "";
+      document.getElementById("moments-date").value = new Date().toISOString().slice(0, 16);
+      document.getElementById("moments-pinned").checked = false;
+      deleteBtn.style.display = "none";
+      openEditor("新建说说");
+    });
+
+    // 编辑说说
+    function editMoment(id) {
+      const moment = currentData.find(m => m.id === id);
+      if (!moment) return;
+
+      editingId = id;
+      document.getElementById("moments-content").value = moment.content || "";
+      document.getElementById("moments-images").value = (moment.images || []).join("\n");
+      document.getElementById("moments-tags").value = (moment.tags || []).join(", ");
+      document.getElementById("moments-location").value = moment.location || "";
+      document.getElementById("moments-date").value = new Date(moment.published).toISOString().slice(0, 16);
+      document.getElementById("moments-pinned").checked = moment.pinned || false;
+      deleteBtn.style.display = "inline-block";
+      openEditor("编辑说说");
+    }
+
+    closeBtn.addEventListener("click", closeEditor);
+    cancelBtn.addEventListener("click", closeEditor);
+
+    // 保存
+    saveBtn.addEventListener("click", async () => {
+      const content = document.getElementById("moments-content").value.trim();
+      if (!content) {
+        statusEl.textContent = "内容不能为空";
+        return;
+      }
+
+      var origText = saveBtn.textContent;
+      saveBtn.disabled = true;
+      saveBtn.textContent = "⏳ 保存中...";
+      statusEl.textContent = "正在连接 GitHub...";
+
+      var images = document.getElementById("moments-images").value
+        .split("\n").map(function(s) { return s.trim(); }).filter(Boolean);
+      var tags = document.getElementById("moments-tags").value
+        .split(",").map(function(s) { return s.trim(); }).filter(Boolean);
+      var location = document.getElementById("moments-location").value.trim();
+      var dateVal = document.getElementById("moments-date").value;
+      var pinned = document.getElementById("moments-pinned").checked;
+
+      var published = dateVal ? new Date(dateVal).toISOString() : new Date().toISOString();
+
+      if (editingId) {
+        var idx = currentData.findIndex(function(m) { return m.id === editingId; });
+        if (idx >= 0) {
+          currentData[idx] = Object.assign({}, currentData[idx], { content: content, images: images, tags: tags, location: location, published: published, pinned: pinned });
+        }
+      } else {
+        currentData.push({
+          id: "ext-" + Date.now(),
+          content: content,
+          published: published,
+          images: images,
+          tags: tags,
+          location: location,
+          pinned: pinned
+        });
+      }
+
+      try {
+        var controller = new AbortController();
+        var timeoutId = setTimeout(function() { controller.abort(); }, 30000);
+        statusEl.textContent = "正在保存到 GitHub...";
+        await fetch(API_BASE, {
+          method: "PATCH",
+          headers: headers,
+          body: JSON.stringify({ files: Object.fromEntries([[fileName, { content: JSON.stringify(currentData, null, 2) }]]) }),
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        statusEl.textContent = "✅ 保存成功";
+        setTimeout(function() {
+          closeEditor();
+          renderList();
+        }, 500);
+      } catch (e) {
+        if (e.name === "AbortError") {
+          statusEl.textContent = "❌ 保存超时，请检查网络后重试";
+        } else {
+          statusEl.textContent = "❌ 保存失败: " + e.message;
+        }
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = origText;
+      }
+    });
+
+    // 删除
+    deleteBtn.addEventListener("click", async () => {
+      if (!editingId || !confirm("确定要删除这条说说吗？")) return;
+
+      deleteBtn.disabled = true;
+      statusEl.textContent = "删除中...";
+
+      currentData = currentData.filter(m => m.id !== editingId);
+
+      try {
+        await fetch(API_BASE, {
+          method: "PATCH",
+          headers,
+          body: JSON.stringify({ files: { [fileName]: { content: JSON.stringify(currentData, null, 2) } } })
+        });
+        statusEl.textContent = "删除成功";
+        setTimeout(() => {
+          closeEditor();
+          renderList();
+        }, 500);
+      } catch (e) {
+        statusEl.textContent = "删除失败: " + e.message;
+      } finally {
+        deleteBtn.disabled = false;
+      }
+    });
+
+    loadMoments();
+  }
+
+  initMomentsAdmin();
+  document.addEventListener("astro:page-load", initMomentsAdmin);
+  document.addEventListener("swup:contentReplaced", initMomentsAdmin);
+</script>

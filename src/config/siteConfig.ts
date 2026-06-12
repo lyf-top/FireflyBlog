@@ -150,6 +150,10 @@ export const siteConfig: SiteConfig = {
 		gallery: true,
 		//说说开关
 		talks: true,
+		// 笔记本页面开关
+		notebooks: true,
+		// 管理后台页面开关
+		admin: true,
 		// 友情链接页面开关
 		friendLink: true,
 		// 站点地图页面开关
