@@ -24,5 +24,5 @@ export const externalMomentsConfig = {
   adminPasswordHash: "dc93d2eb4092ae36436c506c7ebf407df24e8a7a53270aa4e1b46a7e0f1f3a23",
 
   /** GitHub Personal Access Token（需要 gist 权限，用于写入数据） */
-  githubToken: "",
+  githubToken: (typeof process !== "undefined" && process.env && process.env.GITHUB_TOKEN) || "",
 };

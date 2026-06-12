@@ -489,18 +489,18 @@ if (!siteConfig.pages.admin) {
         </div>
         <div class="admin-nav">
           {externalMomentsConfig.enable && (
-            <button onclick="window.location.href='/admin/moments/'" class="admin-nav-item" style="width:100%;text-align:left;cursor:pointer;">
+            <a href="/admin/moments/" class="admin-nav-item">
               <span class="admin-nav-icon">💬</span>
               <span class="admin-nav-text">管理说说</span>
               <span class="admin-nav-arrow">›</span>
-            </button>
+            </a>
           )}
           {externalNotebooksConfig.enable && (
-            <button onclick="window.location.href='/admin/notebooks/'" class="admin-nav-item" style="width:100%;text-align:left;cursor:pointer;">
+            <a href="/admin/notebooks/" class="admin-nav-item">
               <span class="admin-nav-icon">📓</span>
               <span class="admin-nav-text">管理笔记</span>
               <span class="admin-nav-arrow">›</span>
-            </button>
+            </a>
           )}
           {!externalMomentsConfig.enable && !externalNotebooksConfig.enable && (
             <p class="no-modules">说说和笔记功能均未启用，请先配置 Gist</p>
@@ -512,13 +512,29 @@ if (!siteConfig.pages.admin) {
 
   <script is:inline define:vars={{
     passwordHash: externalMomentsConfig.adminPasswordHash || externalNotebooksConfig.adminPasswordHash || "",
-    githubToken: externalMomentsConfig.githubToken || ""
+    githubToken: externalMomentsConfig.githubToken || "",
+    enableMoments: externalMomentsConfig.enable,
+    enableNotebooks: externalNotebooksConfig.enable
   }}>
     (function() {
+      console.log("[Admin] init", { enableMoments: enableMoments, enableNotebooks: enableNotebooks });
       var savedToken = localStorage.getItem("admin_token");
+      console.log("[Admin] savedToken:", savedToken);
+
+      // 检测深色模式
+      if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        document.getElementById("admin-right").classList.add("dark");
+      }
+
+      // 如果已有有效 Token，直接显示面板
       if (savedToken && savedToken !== "pending") {
         showPanel();
         return;
+      }
+
+      // 清除旧的无效 token
+      if (savedToken === "pending") {
+        localStorage.removeItem("admin_token");
       }
 
       // 检测深色模式
@@ -527,6 +543,7 @@ if (!siteConfig.pages.admin) {
       }
 
       document.getElementById("admin-login-btn").addEventListener("click", function() {
+        console.log("[Admin] login button clicked");
         var password = document.getElementById("admin-password").value;
         var errorEl = document.getElementById("admin-login-error");
 
@@ -552,8 +569,10 @@ if (!siteConfig.pages.admin) {
             // 密码正确，存储 Token
             if (githubToken) {
               localStorage.setItem("admin_token", githubToken);
+              console.log("[Admin] stored githubToken");
             } else {
               localStorage.setItem("admin_token", "pending");
+              console.log("[Admin] stored pending token");
             }
             showPanel();
           });
@@ -561,8 +580,10 @@ if (!siteConfig.pages.admin) {
           // 没设密码哈希，直接通过
           if (githubToken) {
             localStorage.setItem("admin_token", githubToken);
+            console.log("[Admin] stored githubToken (no hash)");
           } else {
             localStorage.setItem("admin_token", "pending");
+            console.log("[Admin] stored pending token (no hash)");
           }
           showPanel();
         }
@@ -574,8 +595,10 @@ if (!siteConfig.pages.admin) {
       });
 
       function showPanel() {
+        console.log("[Admin] showPanel called");
         document.getElementById("admin-login").style.display = "none";
         document.getElementById("admin-panel").style.display = "block";
+        console.log("[Admin] panel display:", document.getElementById("admin-panel").style.display);
       }
     })();
   </script>

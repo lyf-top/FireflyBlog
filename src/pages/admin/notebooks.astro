@@ -132,9 +132,9 @@ const templates = externalNotebooksConfig.templates;
       "Content-Type": "application/json"
     };
 
-    let currentNotebook = null;
-    let currentEntries = [];
-    let editingEntryId = null;
+    var currentNotebook = null;
+    var currentEntries = [];
+    var editingEntryId = null;
 
     const selectView = document.getElementById("notebooks-admin-select");
     const entriesView = document.getElementById("notebook-entries-admin");
@@ -175,7 +175,7 @@ const templates = externalNotebooksConfig.templates;
         const gist = await res.json();
         const content = gist.files["notebooks-entries.json"]?.content || '{"entries":[]}';
         const data = JSON.parse(content);
-        currentEntries = data.entries || [];
+        currentEntries = Array.isArray(data.entries) ? data.entries : [];
         renderEntries();
       } catch (e) {
         entriesList.innerHTML = '<div class="admin-error">加载失败</div>';
@@ -302,6 +302,8 @@ const templates = externalNotebooksConfig.templates;
       statusEl.textContent = "正在连接 GitHub...";
 
       var now = new Date().toISOString();
+
+      if (!Array.isArray(currentEntries)) currentEntries = [];
 
       if (editingEntryId) {
         var idx = currentEntries.findIndex(function(e) { return e.id === editingEntryId; });

@@ -30,7 +30,7 @@ export const externalNotebooksConfig = {
   enable: true,
 
   /** GitHub Personal Access Token（需要 gist 权限，用于写入数据） */
-  githubToken: "",
+  githubToken: (typeof process !== "undefined" && process.env && process.env.GITHUB_TOKEN) || "",
 
   /**
    * 笔记本 → Gist ID 映射
