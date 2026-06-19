@@ -22,8 +22,52 @@ updated: 2026-04-28 10:43:03
 <hr>分割线 <br>换行 ！生成大致结构
 <h1>1号标题</h1>
 <P>段落
+<b>加粗  <em>倾斜
+&nbsp 空格
+<s> <u>下划线
+```
+
+### 图像
 
 ```
+<img src="assets/test.png" 
+alt="这是一个简单的图片" //加载不出来显示
+loading="lazy" 
+width="200" height="200"
+title="这是一个简单的图片"//鼠标放上去显示对应文字
+>
+
+```
+
+### 超链接
+
+```
+<a href="https://www.jetbrains.com/webstorm/" target="_blank">
+	<img src="assets/test.png" alt="每次都要写这个，好烦">
+	
+</a>
+默认值为_self，表示在当前页面进行跳转，要在新窗口打开我们需要使用_blank：
+```
+
+### 列表
+
+```
+<ol  type="a">
+  <li>我是第一项</li>
+  <li>我是第二项</li>
+</ol>
+//1：阿拉伯数字1/2/3/4排序
+//a：小写英文字母abcd排序
+//A：大写字母ABCD排序
+//i：大写罗马数字I、II、III排序
+
+<ul>
+  <li>我是第一项</li>
+  <li>我是第二项</li>
+</ul>
+```
+
+
 
 ### 表格练习
 
@@ -71,9 +115,36 @@ updated: 2026-04-28 10:43:03
 </html>
 ```
 
+### 表单
+
+#### 文本输入框
+
+```
+<form>
+  <input value="牛魔的"  size="10" maxlength="5">
+</form>
+email：电子邮件地址输入，支持格式验证
+url：URL输入，支持格式验证
+tel：电话号码输入
+number：数字输入，可以使用上下箭头进行增减
+range：范围输入，通常以滑块形式呈现
+date：日期选择输入，通常显示日期选择器
+time：时间选择输入，通常显示时间选择器
+datetime-local：本地日期和时间输入
+month：月份选择输入
+week：周选择输入
+color：颜色选择输入，通常显示颜色选择器
+file：文件选择输入，允许用户上传文件
+hidden：隐藏输入，不在页面上显示
+search：搜索框输入，通常在样式上有所不同
+button：普通按钮
+submit：提交按钮
+reset：重置按钮
+```
 
 
-### 表单练习
+
+#### 表单练习
 
 ```
 <!DOCTYPE html>
@@ -91,11 +162,15 @@ updated: 2026-04-28 10:43:03
     <form action="">
         <hr><br>
         昵称：<input type="text" name="" id="" placeholder="请输入昵称">
+        //placeholder默认输入值
+        
         <br><br>
         性别：
         <label><input type="radio" name="gender" checked>男</label>
         <label><input type="radio" name="gender">女</label>
         <br><br>
+        
+        
         所在城市：
         <select>
             <option>北京</option>
@@ -103,6 +178,7 @@ updated: 2026-04-28 10:43:03
             <option>广州</option>
             <option selected>深圳</option>
         </select>
+        
         <br><br>
         婚姻状况：
         <input type="radio" name="memroy" checked>未婚
@@ -138,7 +214,63 @@ updated: 2026-04-28 10:43:03
 
 ## CSS
 
+### 引入css样式
+
+```
+//行内css
+<p style="color: green;font-weight: 800">
+  我是一段文本，我想请问你要干嘛，为什么要黑我们家鸽鸽
+</p>
+//head标签里内置style
+<head>
+  <meta charset="UTF-8">
+  <title>我是网站标题</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    p {   /* 注意使用内部样式需要通过选择器去指定样式能够作用的范围 */
+      color: green;
+      font-weight: 800;
+    }
+  </style>
+</head>
+//外联css
+<link rel="stylesheet" type="text/css" href="style.css">
+```
+
+
+
 ### CSS选择器
+
+#### 通配符选择器
+
+```
+* {
+  color: blueviolet;
+}
+```
+
+#### 交集选择器
+
+```
+只有同时为p标签并且class中存在test类的元素才能被选中
+p.test#p {
+  color: blueviolet;
+}
+```
+
+#### 并集选择器
+
+```
+p { color: blueviolet; }
+a { color: blueviolet }
+div { color: blueviolet }
+
+p, a, div {  /* 与上面的代码效果等价 */
+  color: blueviolet;
+}
+```
+
+
 
 #### 后代选择器
 
@@ -182,6 +314,30 @@ updated: 2026-04-28 10:43:03
 </div>
 ```
 
+#### 兄弟选择器
+
+```
+.content + p {
+  color: blueviolet;
+}
+相邻兄弟选择器只能选择其下一个相邻兄弟元素，再之后的元素无法选中。
+```
+
+#### 属性选择器
+
+```
+<a href="https://www.baidu.com">我是百度</a>
+<a href="https://www.bing.com">我是必应</a>
+<div>大家一般用哪一个作为搜索引擎呢？</div>
+
+
+a[href*="Bing" i] {i来忽略大小写进行匹配：*来表示至少包含一个bing的元素
+  color: blueviolet;
+}
+```
+
+
+
 #### hover伪选择器
 
 ```
@@ -197,7 +353,50 @@ a:hover{
 
 ```
 
-### CSS文体和文字样式
+### 选择器优先级
+
+```
+a: 行内样式的数量（这个数量代表的是有没有内联样式，而非内联样式写了多少，所以只有1和0）
+b: ID 选择器的数量。
+c: 类选择器、属性选择器和伪类的数量。
+d: 元素选择器和伪元素的数量。
+```
+
+```
+.test { color: red; }   /* 优先级为 (0, 0, 1, 0) */
+#aaa { color: blue; }   /* 优先级为 (0, 1, 0, 0) */
+#aaa.test { color: green; }   /* 优先级为 (0, 1, 1, 0) */
+显示green
+
+出现了两个相同有优先级的选择器
+t2是写在.t1后面的，因此在同等优先级下后者更高
+
+!important最高级
+```
+
+### CSS继承
+
+```
+<div class="t1">
+  <p>This is a paragraph</p>
+</div>
+
+.t1 { color: red; }
+
+color属性就是支持自动继承的属性，自动继承的属性会将其生效给所有的子级元素，除非子元素又单独去设定自己的样式。当然支持自动继承的属性并非所有，只有部分CSS属性会被自动继承，包括文本相关的属性，如 color, font-family, font-size, line-height, visibility, cursor 等，其他属性如盒子模型相关的 margin, padding, border, width, height 等，都不会自动继承
+```
+
+```
+<div class="t1">
+  <p style="color: initial">This is a paragraph</p>
+</div>
+//指定其为初始值
+inherit来表示，如果我们希望某个属性变回自动继承的效果，
+```
+
+
+
+### CSS文字样式
 
 #### 文体大小
 
@@ -205,6 +404,10 @@ a:hover{
 <div style="font-size: 16px;">Hello World!</div>
 <div style="font-size: 26px;">Hello World!</div>
 //浏览器默认16px
+
+.test { font-size: 12px }
+.test p { font-size: 1.5em }
+由于父元素的字体大小只有12px，其内部元素会自动继承12px的大小，我们将其内部子元素的大小设置为1.5em相对大小，也就是当前元素字体大小的1.5倍
 ```
 
 
@@ -236,7 +439,7 @@ a:hover{
 <div style="font-family: Consolas, fira Code, monospace;">Hello World!</div>
 ```
 
-
+### CSS文本样式
 
 #### 文体缩进
 
@@ -272,6 +475,10 @@ a:hover{
 <p style="text-decoration: underline;">Hello World!</p>
 <p style="text-decoration: line-through;">Hello World!</p>
 <p style="text-decoration: overline;">Hello World!</p>
+
+.test p span {
+  text-decoration: line-through red dashed;   /* 不仅添加了中划线，还会使中划线变成红色的虚线样式 */
+}
 ```
 
 #### 行高
@@ -473,6 +680,7 @@ background-color: transparent;
        //no-repeat	不平铺
         //repeat-x  	水平方向平铺（x 轴）
         //repeat-y	垂直方向平铺（y 轴）
+        要解决重复渲染的问题，我们可以使用background-repeat来防止背景图片进行重复渲染，默认情况下只要背景图片小于盒子尺寸，都会进行重复渲染，这里只需设置到no-repeat即可：
     }
 </style>
 
@@ -583,8 +791,7 @@ a span b u i s strong ins em del
    - 内容区域 content
 1. 盒子内容的宽高
    - width
-- height
-
+   - height
 ##### boder边框
 
   ```
@@ -621,7 +828,13 @@ padding-top: 10px;
 padding-bottom: 10px;
 padding-left: 10px;
 padding-right: 10px;
+
+padding 的百分比始终相对于父元素的宽度来计算
 ```
+
+，盒子模型采用的是`content-box`模式，width / height **只包含内容区（content）**，不包含 padding 和 border，所以当我们添加边距和边框时，盒子的尺寸会变大：
+
+box-sizing: border-box;   /* 此时盒子的高度就是height设定的高度 */
 
 #### 新浪导航
 
@@ -650,6 +863,7 @@ padding-right: 10px;
             font-size: 10px;
             display: inline-block;
             text-decoration: none;
+            //文本垂直居中
             line-height: 40px;
         }
         a:hover {
@@ -1484,6 +1698,8 @@ border-radius: 左上 右上 右下 左下;
         background-color: skyblue;
 
         overflow: hidden;
+          overflow-y: auto;   /* 只允许垂直滚动 */
+          overflow-x: hidden; /* 禁止水平滚动 */
     }
 </style>
 
@@ -1737,15 +1953,152 @@ background-size: 宽度 高度;
      <div class="box"></div>
      ```
 
+### 2D转换
+
+二维变换（2D Transform）是指在 X 轴和 Y 轴组成的平面上进行的变换。所有的二维变换都是通过 `transform` 属性来实现的。
+
+使用 `translate()` 函数可以将元素从当前位置沿着 X 轴和 Y 轴移动
+
+```
+<div>
+  <div class="box"></div>
+  <div>熊大，坐直升机的感觉可真舒服，就跟牢大一样</div>
+</div>
 
 
+.box {
+  width: 100px;
+  height: 100px;
+  background-color: red;
+  /* 表示横向移动10px，纵向移动20px */
+  transform: translate(10px, 20px);
+}
+```
 
+`relative`定位相当于盒子自己发生了移动但又留着原来的位置，而`translate`则是盒子依然在原地，只是我们自己看起来像是被移动了而已。因此，`translate`更适合我们后面要介绍的动画功能，因为它仅仅是改变盒子渲染的位置，而非真正移动了盒子，我们后续介绍的所有变换效果实际上都是视觉变换，而非真正作用于盒子上。
 
+#### 缩放
 
+```
+.box {
+  width: 100px;
+  height: 100px;
+  background-color: red;
+  transform: scale(1.5);   /* 变为原本1.5倍的大小 */
+}
+transform: scale(1.5, 2);
+```
 
+#### 旋转
 
+```
+rotate() 函数可以让元素围绕中心点进行旋转
+skew() 函数可以让元素产生倾斜变形效果，看起来像是一个平行四边形：
+```
 
+#### 原点变换
 
+默认情况下，所有的变换（特别是旋转和缩放）都是围绕元素的**中心点**（`center center`）进行的。我们可以通过 `transform-origin` 属性来改变这个基点
 
+```
+.box {
+  /* 将旋转中心改为左上角 */
+  transform-origin: left top;
+  transform: rotate(45deg);
+}
+```
 
+#### 组合变换
 
+如果我们需要同时对元素进行平移、旋转和缩放，可以将这些函数写在同一个 `transform` 属性中，用空格隔开。
+
+```
+.box {
+  /* 先移动，再旋转，最后缩放 */
+  transform: translate(100px) rotate(45deg) scale(1.2);
+}
+```
+
+### 动画
+
+. 什么是动画？
+
+  变换（transform） 是静态的，动画（animation） 让它动起来。
+
+  /* 变换：静态效果 */
+  .box { transform: translate(100px); }
+
+  /* 动画：从左到右动起来 */
+  .box { animation: move 2s; }
+
+---
+  2. @keyframes 关键帧
+
+  定义动画的每个阶段：
+
+  @keyframes 动画名称 {
+      0%   { /* 开始状态 */ }
+      50%  { /* 中间状态 */ }
+      100% { /* 结束状态 */ }
+  }
+
+  课程例子（demo2.2.html）：
+  @keyframes move {
+      0%   { transform: translate(0,0); }
+      25%  { transform: translate(1000px,0); }
+      50%  { transform: translate(1000px,500px); }
+      75%  { transform: translate(0,500px); }
+      100% { transform: translate(0,0); }
+  }
+
+---
+  3. animation 属性详解
+
+| 属性                      | 作用         | 值                      |
+| ------------------------- | ------------ | ----------------------- |
+| animation-name            | 关联关键帧   | move                    |
+| animation-duration        | 动画时长     | 2s                      |
+| animation-timing-function | 速度曲线     | ease / linear / ease-in |
+| animation-delay           | 延迟多久开始 | 1s                      |
+| animation-iteration-count | 播放次数     | 1 / infinite（无限）    |
+| animation-direction       | 是否反向     | normal / alternate      |
+| animation-fill-mode       | 结束后状态   | forwards / backwards    |
+| animation-play-state      | 暂停/播放    | paused / running        |
+
+---
+  4. 课程例子（demo2.3.html）
+
+  div {
+      animation-name: move;
+      animation-duration: 2s;
+      animation-timing-function: ease;
+      animation-delay: 1s;
+      animation-iteration-count: infinite;
+      animation-direction: alternate;
+      animation-fill-mode: forwards;
+  }
+
+  div:hover {
+      animation-play-state: paused;  /* 悬停暂停 */
+  }
+
+---
+  5. 简写语法
+
+  /* 完整写法 */
+  animation: move 2s ease 1s infinite alternate forwards;
+
+  /* 简写 */
+  animation: move 2s;
+
+---
+  6. 太阳动画原理
+
+  /* 太阳：从左下 → 上方 → 右下 */
+  @keyframes moveSun {
+      0%   { transform: translate(0,0); background: yellow; }
+      50%  { transform: translate(200px,-100px); background: orange; }
+      100% { transform: translate(400px,0); background: yellow; }
+  }
+
+  太阳 + 阴影配合，模拟日照效果 ☀️
