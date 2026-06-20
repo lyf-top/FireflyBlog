@@ -105,7 +105,7 @@ title="这是一个简单的图片"//鼠标放上去显示对应文字
             <tr>
                 <td>评语</td>
                 <td colspan="3">你们都很优秀</td>
-            </tr>
+            </tr>    
         </table>
     </form>
 
@@ -351,6 +351,10 @@ a:hover{
 <a href="#">Hello World</a>
 //鼠标悬停于超链接上时，链接字体变为红色，并且失去下划线
 
+
+- `:link`：未访问的链接
+- `:visited`：已访问的链接
+- `:active`：鼠标按下时的状态
 ```
 
 ### 选择器优先级
@@ -471,10 +475,10 @@ inherit来表示，如果我们希望某个属性变回自动继承的效果，
 #### 文体修饰
 
 ```
-<p style="text-decoration: none;">Hello World!</p>
-<p style="text-decoration: underline;">Hello World!</p>
-<p style="text-decoration: line-through;">Hello World!</p>
-<p style="text-decoration: overline;">Hello World!</p>
+<p style="text-decoration: none;">
+<p style="text-decoration: underline;">下划线
+<p style="text-decoration: line-through;">删除线
+<p style="text-decoration: overline;">上划线
 
 .test p span {
   text-decoration: line-through red dashed;   /* 不仅添加了中划线，还会使中划线变成红色的虚线样式 */
@@ -501,9 +505,24 @@ inherit来表示，如果我们希望某个属性变回自动继承的效果，
   - 取消上下间距：line-height=1
 
     ```
-    <p style="line-height: 1">Hello World!</p>
-    <p style="line-height: 1.5;">Hello World!</p>
-    <p style="line-height: 3;">Hello World!</p>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <title>行高</title>
+        <style type="text/css">
+            p{
+                /* line-height: 50px; */   /* 固定行高 */
+                /* line-height: 5; */      /* 倍数（无单位，是字号的倍数） */
+    
+                /* font 复合属性中的行高写法：字号/行高 */
+                font: italic 700 20px/2 宋体;  /* 字号20px，行高是字号的2倍=40px */
+            }
+        </style>
+    </head>
+    <body>
+        <p>在这个数字化时代，计算机科学一直是科技界的热门话题...行高为字号的2倍</p>
+    </body>
+    </html>
 #### font属性编写
 
 ```
@@ -768,7 +787,14 @@ a span b u i s strong ins em del
 | inline-block | 行内块元素 |
 |    inline    |  行内元素  |
 
-- 块级元素一般作为大容器;
+| 类型                   | 特点               | 代表标签                        |
+| ---------------------- | ------------------ | ------------------------------- |
+| 块级（Block）          | 独占一行，宽高有效 | `div`、`p`、`h1~h6`、`ul`、`li` |
+| 行内（Inline）         | 不换行，宽高无效   | `span`、`a`、`em`、`strong`     |
+| 行内块（Inline-block） | 不换行，宽高有效   | `img`、`input`、`td`            |
+
+
+  块级元素一般作为大容器;
 
 - 可以嵌套文本、块级元素、行内元素、行内块元素
 
@@ -814,15 +840,17 @@ a span b u i s strong ins em del
   //dotted 点线
   ```
 
+**border-style 是必须的，没有 style 边框不显示**
+
 ##### 内边距padding
 
 ```
-/* 可取 4 个值、3 个值、2 个值、1 个值 */
-padding: 上 右 下 左;
-padding: 上 左右 下;
-padding: 上下 左右;
-padding: 上下左右;
+padding 简写规则（顺时针）：
 
+- `padding: 10px;` → 四边都是 10px
+- `padding: 10px 20px;` → 上下 10px，左右 20px
+- `padding: 10px 20px 30px;` → 上 10px，左右 20px，下 30px
+- `padding: 10px 20px 30px 40px;` → 上 右 下 左
 /* 单个方向 */
 padding-top: 10px;
 padding-bottom: 10px;
@@ -861,8 +889,11 @@ box-sizing: border-box;   /* 此时盒子的高度就是height设定的高度 */
             height: 40px;
             color: black;
             font-size: 10px;
-            display: inline-block;
+            display: inline-block;/* 行内→行内块，可设宽高 */
             text-decoration: none;
+             
+             padding: 0 16px;
+             box-sizing: border-box /*否则会撑大盒子*/
             //文本垂直居中
             line-height: 40px;
         }
@@ -901,14 +932,36 @@ margin-right: 10px;
 ##### 元素居中
 
 ```
-.box { 
-  margin: 0 auto;
-}
+
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style type="text/css">
+        div{
+            width: 1000px;
+            height: 300px;
+            background-color: pink;
+            margin: 0 auto; 
+            /* 上下0，左右auto → 水平居中 */
+        }
+    </style>
+</head>
+<body>
+    <div>版心</div>  <!-- 居中显示 -->
+</body>
+</html>
 ```
+
+上下外边距为 0，左右自动分配（居中)
+
+只对**定宽的块级元素**有效
+
+行内元素/行内块元素需要用 `text-align: center` 居中
 
 ##### 清除浏览器默认样式
 
 ```
+/*浏览器给 `body`、`p`、`h1~h6`、`ul`、`ol` 等标签都有默认 margin*/
 * {
   margin: 0;
   padding: 0;
@@ -929,10 +982,40 @@ ul {
 ##### 合并现象
 
 - 场景：垂直布局的块级元素，上下的 margin 会合并
+
 - 结果：最终两者距离为 margin 的最大值
+
 - 解决方法：只给其中一个盒子设置 margin
 
 ```
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style type="text/css">
+        div{
+            width: 100px;
+            height: 100px;
+            background-color: pink;
+        }
+        .one{
+            margin-bottom: 50px;    <!-- 下外边距50px（后面又定义了60px） -->
+            margin-bottom: 60px;    <!-- 覆盖为60px -->
+        }
+        .two{
+            margin-top: 50px;       <!-- 上外边距50px -->
+        }
+    </style>
+</head>
+<body>
+    <div class="one">11</div>       <!-- 下 margin: 60px -->
+    <div class="two">22</div>       <!-- 上 margin: 50px -->
+    <!-- 两个 div 之间间距 = 60px（取较大值），而不是 60+50=110px -->
+</body>
+</html>
+```
+
+```
+解决方法一：只设置一个margin
 <style>
     .box-1 {
         width: 100px;
@@ -1091,6 +1174,38 @@ ul {
 ```
 
 ### 浮动
+
+#### inline-block 间隙问题
+
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style type="text/css">
+        div{
+            width: 100px;
+            height: 100px;
+            display: inline-block;    /* 行内块：不换行，宽高有效 */
+            /*
+             * 浏览器解析行内块或行内标签的时候，
+             * 如果标签换行书写会产生一个空格的距离。
+             */
+        }
+        .one{ background-color: pink; }
+        .two{ background-color: skyblue; }
+    </style>
+</head>
+<body>
+    <div class="one">div-one</div>   <!-- 两个 div 之间有几px间隙 -->
+    <div class="two">div-two</div>
+</body>
+</html>
+```
+
+- 解决方法1：将标签写在同一行（不换行）
+- 解决方法2：父元素设置 `font-size: 0`，子元素再恢复字号
+- 解决方法3：使用 `float` 代替 `inline-block`
 
 #### 结构伪类选择器
 
@@ -1464,7 +1579,96 @@ clear: both;
 }
 ```
 
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style type="text/css">
+        .top{
+            margin: 0 auto;
+            width: 1000px;
+            background-color: pink;
+            /* 没有 overflow: hidden */
+        }
+        .bottom{
+            height: 100px;
+            background-color: green;
+        }
+        .left{
+            float: left;
+            width: 200px;
+            height: 300px;
+            background-color: #ccc;
+        }
+        .right{
+            float: right;
+            width: 790px;
+            height: 300px;
+            background-color: skyblue;
+        }
+        .clearfix{                 /* 清除浮动的空div */
+            clear: both;           /* 清除左右两侧的浮动 */
+        }
+    </style>
+</head>
+<body>
+    <div class="top">
+        <div class="left"></div>
+        <div class="right"></div>
+        <div class="clearfix"></div>  <!-- 空div：清除浮动 -->
+    </div>
+    <div class="bottom"></div>        <!-- green 正常显示在下方 -->
+</body>
+</html>
+```
+
+
+
 ##### 给父元素设置 overflow:hidden
+
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style type="text/css">
+        .top{
+            margin: 0 auto;
+            width: 1000px;
+            /* height: 300px; */     /* 没有设置高度！ */
+            background-color: pink;
+            overflow: hidden;        /* 关键：清除浮动，自动撑开高度 */
+        }
+        .bottom{
+            height: 100px;
+            background-color: green;
+        }
+        .left{
+            float: left;
+            width: 200px;
+            height: 300px;
+            background-color: #ccc;
+        }
+        .right{
+            float: right;
+            width: 790px;
+            height: 300px;
+            background-color: skyblue;
+        }
+    </style>
+</head>
+<body>
+    <!-- 父子级标签,子级浮动,父级没有高度,
+         后面的标准流盒子会受影响,显示到上面的位置 -->
+    <div class="top">
+        <div class="left"></div>
+        <div class="right"></div>
+    </div>
+    <div class="bottom"></div>  <!-- 如果父级没清除浮动，green 会跑到上面 -->
+</body>
+</html>
+```
 
 
 
@@ -1588,6 +1792,76 @@ clear: both;
 </div>
 ```
 
+#### 导航栏 + 二维码浮层
+
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style type="text/css">
+        *{ margin: 0; padding: 0; }       /* 清除默认样式 */
+
+        .nav{
+            height: 40px;
+            border-bottom: 1px solid #ccc;
+        }
+        ul{
+            list-style: none;             /* 去除列表圆点 */
+            width: 1200px;
+            margin: 0 auto;               /* 导航居中 */
+        }
+        ul li{
+            float: left;                  /* 浮动实现并排 */
+            width: 20%;                   /* 每项占20%宽度 */
+            height: 40px;
+            border-right: 1px solid #ccc; /* 右边框分隔线 */
+            box-sizing: border-box;       /* border 不撑大盒子 */
+            text-align: center;           /* 水平居中 */
+            line-height: 40px;            /* 垂直居中 */
+        }
+        ul .right{
+            border-right: none;           /* 最后一项去掉右边框 */
+        }
+        ul li a{
+            display: block;               /* a 转块级，可设宽高 */
+            height: 40px;
+            text-decoration: none;        /* 去下划线 */
+            color: black;
+        }
+        ul li .app{
+            position: relative;           /* 相对定位：作为绝对定位的参考 */
+        }
+        .code{
+            position: absolute;           /* 绝对定位：相对于 .app */
+            left: 50%;                    /* 水平居中起点 */
+            top: 40px;                    /* 导航下方 */
+            transform: translate(-50%);   /* 向左偏移自身宽度的50%，实现居中 */
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <ul>
+            <li><a href="#">首页</a></li>
+            <li><a href="#">学校概况</a></li>
+            <li><a href="#">机构设置</a></li>
+            <li><a href="#" class="app">学院党建
+                <img src="pic/code.png" alt="" class="code">  <!-- 悬停时显示的二维码 -->
+            </a></li>
+            <li class="right"><a href="#">联系我们</a></li>
+        </ul>
+    </div>
+</body>
+</html>
+```
+
+- `float: left`：让 `<li>` 并排显示
+- `position: relative` + `position: absolute`：实现二维码浮层的精确定位
+- `transform: translate(-50%)`：水平居中技巧（左移自身宽度一半）
+- `box-sizing: border-box`：border 不撑大盒子
+- `line-height: 40px`：单行文字垂直居中
+
 ### 装饰
 
 #### 垂直对齐 vertical-align
@@ -1678,6 +1952,63 @@ border-radius: 左上 右上 右下 左下;
     
     <div class="box"></div>
     ```
+
+#### 光标
+
+|               | 效果     | 常用场景             |
+| ------------- | -------- | -------------------- |
+| `default`     | 默认箭头 | 普通元素             |
+| `pointer`     | 手型     | 链接、按钮（最常用） |
+| `text`        | 工字形   | 可选中文本           |
+| `move`        | 十字箭头 | 可拖拽元素           |
+| `not-allowed` | 禁止     | 禁用按钮             |
+| `wait`        | 加载中   | 等待状态             |
+
+- 开发中 `cursor: pointer` 使用最频繁（提示用户可点击）
+
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style type="text/css">
+        div{
+            width: 200px;
+            height: 200px;
+            background-color: pink;
+
+            cursor: pointer;    /* 手型（最常用于可点击元素） */
+            cursor: text;       /* 工字形（文本选择） */
+            cursor: move;       /* 十字形（可移动） */
+        }
+    </style>
+</head>
+<body>
+    <div>div</div>
+</body>
+</html>
+```
+
+#### :focus 伪类
+
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style type="text/css">
+        input:focus{                /* 输入框获得焦点时 */
+            background-color: yellow;  /* 背景变黄色 */
+        }
+    </style>
+</head>
+<body>
+    <input type="text" name="" id="">
+</body>
+</html>
+```
+
+
 
 #### 溢出部分效果 overflow
 
