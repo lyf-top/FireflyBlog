@@ -1,7 +1,7 @@
 ---
 title: Go学习
 description: Go学习之路开启
-image: 'https://img.f3f3.top/img/2026/05/30/3436b194df5927cb358f69c945d495d8.webphttps://img.f3f3.top/img/2026/05/30/da45596576f04825512ee17c4ebb77c6.webp' #文章封面页
+image: 'https://img.f3f3.top/img/2026/05/30/3436b194df5927cb358f69c945d495d8.webp' #文章封面页
 tags:
   - Go初识与进阶
 category:  java转go指南
