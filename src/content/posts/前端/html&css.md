@@ -860,7 +860,9 @@ padding-right: 10px;
 padding 的百分比始终相对于父元素的宽度来计算
 ```
 
-，盒子模型采用的是`content-box`模式，width / height **只包含内容区（content）**，不包含 padding 和 border，所以当我们添加边距和边框时，盒子的尺寸会变大：
+##### box-sizing
+
+盒子模型采用的是`content-box`模式，width / height **只包含内容区（content）**，不包含 padding 和 border，所以当我们添加边距和边框时，盒子的尺寸会变大：
 
 box-sizing: border-box;   /* 此时盒子的高度就是height设定的高度 */
 
@@ -1548,7 +1550,7 @@ ul {
             height: 100px;
             background-color: green;
         }
-
+<-父标签后面的伪元素->
 +       .clearfix::after {
 +           content: '';
 +           display: block;
@@ -1607,6 +1609,7 @@ clear: both;
             height: 300px;
             background-color: skyblue;
         }
+        
         .clearfix{                 /* 清除浮动的空div */
             clear: both;           /* 清除左右两侧的浮动 */
         }
@@ -1638,6 +1641,7 @@ clear: both;
             width: 1000px;
             /* height: 300px; */     /* 没有设置高度！ */
             background-color: pink;
+            //
             overflow: hidden;        /* 关键：清除浮动，自动撑开高度 */
         }
         .bottom{
